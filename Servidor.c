@@ -6,49 +6,30 @@
 #include <netinet/in.h>
 #include <stdio.h>
 #include <mysql.h>
+#include <pthread.h>
 
-int main (int argc, char *argv[])
+int contador;
+
+//Estructura necessaria para acceso excluyente
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
+void *AtenderCliente (void *socket)
 {
-	int sock_conn, sock_listen, ret;
-	struct sockaddr_in serv_adr;
+	int sock_conn, sock_listen, ret, *s;
+	s = (int *) socket;
+	sock_conn = *s;
 	char peticion[512];
 	char respuesta[512];
 	char respuesta1[512];
-	//abrimos socket
-	if ((sock_listen = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-		printf("Error creando socket");
-	//hacemos el bind al puerto
-	//Inicaliza en zero serv_adr
-	memset(&serv_adr, 0, sizeof(serv_adr));
-	serv_adr.sin_family = AF_INET;
-	
-	//Asocia el socket a cualquier IP de la maquina
-	//htonl formatea el numero que recibe al formato necessario
-	serv_adr.sin_addr.s_addr = htonl(INADDR_ANY);
-	//escuchamos en el puerto 9050
-	serv_adr.sin_port = htons(9050);
-	if (bind(sock_listen, (struct sockaddr *) &serv_adr, sizeof(serv_adr)) < 0)
-		printf ("Error al bind");
-	
-	//Maximo de peticiones en la cola es de 3
-	if (listen(sock_listen, 3) < 0)
-		printf ("Error en el Linsten");
-	
-	int i;
-	//Atenderemos 5 peticiones
-	for (;;){
-		printf ("Escuchando\n");
-		
-		sock_conn = accept(sock_listen, NULL, NULL);
-		printf ("He recibido conexion\n");
-		int terminar = 0;
-		while(terminar == 0)
-		{
+
+	int terminar = 0;
+	while(terminar == 0)
+	{
 			//Ahora recibimos su nombre, que dejamos en el buf
 			ret=read(sock_conn,peticion, sizeof(peticion));
 			printf ("Recibido\n");
 			
-			//Tenemos que añadir la marca de fin de string para que no escriba lo que hay en el buffer
+			//Tenemos que aÃ±adir la marca de fin de string para que no escriba lo que hay en el buffer
 			peticion[ret]='\0';
 			
 			//Escribinos el nombre en consola
@@ -56,9 +37,8 @@ int main (int argc, char *argv[])
 			printf("Peticion: %s\n", peticion);
 			
 			//Vamos a ver que nos pide la peticion
-			char *p = strtok( peticion, "/");
+			char *p = strtok(peticion, "/");
 			char codigo[10];
-			char ID[10];
 			char NOMBRE[50];
 			char PASSWORD[15];
 			if (codigo !=0)
@@ -66,7 +46,7 @@ int main (int argc, char *argv[])
 				p = strtok (NULL, "/");
 				
 				strcpy(NOMBRE, p);
-				printf ("ID: %s, Nombre: %s\n", ID, NOMBRE);
+				printf ("Codigo: %s, Nombre: %s\n", codigo, NOMBRE);
 			}
 			if (codigo ==0) //peticion de desconexion
 			{
@@ -76,7 +56,7 @@ int main (int argc, char *argv[])
 			{
 				p = strtok (NULL, "/");
 				strcpy(PASSWORD, p);
-				printf ("ID: %s, Nombre: %s, Password: %s\n", ID, NOMBRE, PASSWORD);
+				printf ("Codigo: %s, Nombre: %s, Password: %s\n", codigo, NOMBRE, PASSWORD);
 				
 				MYSQL *conn;
 				int err;
@@ -135,7 +115,6 @@ int main (int argc, char *argv[])
 			}
 			else if(codigo == 2)
 			{
-				printf ("Codigo: %d, Nombre: %s\n", codigo, NOMBRE);
 				sprintf (respuesta,"%d",DamePartidasGanadas(NOMBRE));
 				write (sock_conn, respuesta, strlen(respuesta));
 			}
@@ -151,12 +130,67 @@ int main (int argc, char *argv[])
 			}
 			printf ("Respuesta: %s\n", respuesta);
 			//lo enviamos
-		}
-		close(sock_conn); 
+			
+			if ((codigo == 2)||(codigo == 3)||(codigo == 4))
+			{
+				pthread_mutex_lock( &mutex ); //no interrumpas
+				contador =  contador+1;
+				pthread_mutex_unlock( &mutex ); //ya puedes interrumpir
+			}
+	}
+	close(sock_conn); 
+}
+
+int main (int argc, char *argv[])	
+{
+	int sock_conn, sock_listen;
+	struct sockaddr_in serv_adr;
+	
+	//abrimos socket
+	if ((sock_listen = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+		printf("Error creant socket");
+	
+	//Fem el bind al port
+	//Inicalitza a zero serv_adr
+	memset(&serv_adr, 0, sizeof(serv_adr));
+	serv_adr.sin_family = AF_INET;
+	
+	//Asocia el socket a qualsevol IP de la maquina
+	//htonl formatea el numero que recibe al formato necesario
+	serv_adr.sin_addr.s_addr = htonl(INADDR_ANY);
+	
+	//escuchamos en el puerto 9050
+	serv_adr.sin_port = htons(9050);
+	
+	if (bind(sock_listen, (struct sockaddr *) &serv_adr, sizeof(serv_adr)) < 0)
+		printf ("Error en el bind");
+	
+	//Maximo de peticiones en la cola es de 3
+	if (listen(sock_listen, 3) < 0)
+		printf ("Error en el Listen");
+	
+	contador = 0;
+	int i;
+	int sockets[100];
+	
+	pthread_t thread;
+	i=0;
+	
+	for (;;){
+		printf ("Escuchando\n");
+		
+		sock_conn = accept(sock_listen, NULL, NULL);
+		
+		printf ("He recibido conexion\n");
+		
+		sockets[i]= sock_conn;
+		//Crear thread y decirle lo que tiene que hacer
+		pthread_create (&thread, NULL, AtenderCliente, &sockets[i]);
+		i=i+1;
 	}
 }
 
-int DamePartidasGanadas(char nombre[20])
+int DamePartidasGanadas(char nombre[50])
 {
 	MYSQL *conn;
 	int err;
@@ -210,7 +244,7 @@ int DamePartidasGanadas(char nombre[20])
 	
 }
 
-int DameTablaJugadores(char username[20])
+int DameTablaJugadores(char nombre[50])
 {
 	MYSQL *conn;
 	int err;
@@ -227,6 +261,7 @@ int DameTablaJugadores(char username[20])
 				mysql_errno(conn), mysql_error(conn));
 		exit (1);
 	}
+	
 	//inicializar la conexion
 	conn = mysql_real_connect (conn, "localhost","root", "mysql", "Stick Fight Game",0, NULL, 0);
 	if (conn==NULL) {
@@ -237,7 +272,7 @@ int DameTablaJugadores(char username[20])
 	
 	//consulta SQL
 	strcpy (consulta, "SELECT * FROM JUGADOR");
-	strcat (consulta, username);
+	strcat (consulta, nombre);
 	strcat (consulta, "'");
 	
 	//Para comprobar errores en la consulta
@@ -264,7 +299,7 @@ int DameTablaJugadores(char username[20])
 }
 
 
-int DameID(char nombre[20])
+int DameID(char nombre[50])
 {
 			MYSQL *conn;
 			int err;
@@ -281,7 +316,7 @@ int DameID(char nombre[20])
 				exit (1);
 			}
 			//inicializar la conexion
-			conn = mysql_real_connect (conn, "localhost","root", "mysql", "Stick Fight  Game", 0, NULL, 0);
+			conn = mysql_real_connect (conn, "localhost","root", "mysql", "Stick Fight Game", 0, NULL, 0);
 			if (conn==NULL) {
 				printf ("Error al inicializar la conexione: %u %s\n", 
 						mysql_errno(conn), mysql_error(conn));
@@ -312,3 +347,5 @@ int DameID(char nombre[20])
 			mysql_close (conn);
 			exit(0);
 }
+
+
