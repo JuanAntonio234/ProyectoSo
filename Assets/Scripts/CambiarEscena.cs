@@ -1,5 +1,5 @@
-using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine;
 
 public class CambiarEscena : MonoBehaviour
 {
@@ -22,5 +22,9 @@ public class CambiarEscena : MonoBehaviour
     public void IrAConsulta()
     {
         SceneManager.LoadScene("Consulta");
+    }
+    public void IrAMenuJuego()
+    {
+        SceneManager.LoadScene("MenuJuego");
     }
 }

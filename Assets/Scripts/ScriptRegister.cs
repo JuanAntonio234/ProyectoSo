@@ -1,9 +1,10 @@
-/*using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using MySql.Data.MySqlClient;
-using MySqlConnector;
+using MySql.Data;
+
 
 public class ScriptRegister : MonoBehaviour
 {
@@ -18,14 +19,14 @@ public class ScriptRegister : MonoBehaviour
 
     private string server = "127.0.0.1";
     private string database = "JUGADOR";
-    private string nombre = "root";
+    private string username = "root";
     private string password = "mimara";
 
 
-    void start()
+    void Start()
     {
 
-        ConnectionString = "Server=" + server + ";Database=" + database + ";Nombre=" + nombre + ";Password=" + password + ";";
+        ConnectionString = "Server=" + server + ";Database=" + database + ";Username=" + username + ";Password=" + password + ";";
         conn = new MySqlConnection(ConnectionString);
 
         RegisterButton.onClick.AddListener(() => RegistrarUsuario());
@@ -58,7 +59,6 @@ public class ScriptRegister : MonoBehaviour
             conn.Close();
         }
     }
-}*/
-
+}
 
 //introducir que una vez se haya registrado vaya al menu del juego
