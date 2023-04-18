@@ -19,4 +19,8 @@ public class CambiarEscena : MonoBehaviour
     {
         SceneManager.LoadScene("MenuPrincipal");
     }
+    public void IrAConsulta()
+    {
+        SceneManager.LoadScene("Consulta");
+    }
 }
