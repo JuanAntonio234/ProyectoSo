@@ -1,4 +1,4 @@
-/*using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using System;
 using System.Data;
@@ -59,4 +59,3 @@ public class SaveDataRegister : MonoBehaviour
         conn.Close();
     }
 }
-*/

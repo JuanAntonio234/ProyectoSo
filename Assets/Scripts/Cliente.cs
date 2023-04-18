@@ -9,9 +9,6 @@ using UnityEngine.UI;
 
 public class Cliente : MonoBehaviour
 {
-
-    
-
     public Button ConectarServidor;
     public Button DesconectarseServidor;
 
