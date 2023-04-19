@@ -15,7 +15,7 @@ public class PlayerListUI : MonoBehaviour
             string ListaJugadores = "";
             foreach (var jugador in NetworkManager.singleton.client.connection.playerControllers)
             {
-                ListaJugadores == ListaJugadores+ jugador.gameObject.name + "\n";
+                ListaJugadores =+ jugador.gameObject.name + "\n";
             }
             TextListaJugadores.text = ListaJugadores;
         }

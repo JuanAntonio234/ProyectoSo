@@ -2,9 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using MySql.Data.MySqlClient;
+using MySqlConnector;
+using UnityEngine.UI;
 
 public class ConsultaMySQL : MonoBehaviour
 {
+    public Button Consulta1;
+    public Button Consulta2;
+    public Button Consulta3;
+
     private MySqlConnection connection;
     private string server = "127.0.0.1";
     private string database = "JUGADOR";
@@ -19,9 +25,9 @@ public class ConsultaMySQL : MonoBehaviour
         connection = new MySqlConnection(connectionString);
         connection.Open();
 
-        Button.onClick.AddListener(MenosPartidasGanadas);
-        Button(1).onClick.AddListener(NombreJugadorDuracionMayor3);
-        Button(2).onClick.AddListener(JugadoresJugadoMismoDiaPere);
+        Consulta1.onClick.AddListener(MenosPartidasGanadas);
+        Consulta2.onClick.AddListener(NombreJugadorDuracionMayor3);
+        Consulta3.onClick.AddListener(JugadoresJugadoMismoDiaPere);
 
     }
 
@@ -50,8 +56,8 @@ public class ConsultaMySQL : MonoBehaviour
         string query = "SELECT JUGADOR.NOMBRE " +
             "FROM JUGADOR, PARTIDA " +
             "WHERE PARTIDA.DURACION > 3 AND JUGADOR.ID = PARTIDA.GANADOR";
-        MySqlCommand cmd = new MySqlCommand(query, connection);
-        MySqlDataReader dataReader = cmd.ExecuteReader();
+      //  MySqlCommand cmd = new MySqlCommand(query, connection);
+      //  MySqlDataReader dataReader = cmd.ExecuteReader();
         while (dataReader.Read())
         {
             string nombreJugador = dataReader.GetString(0);

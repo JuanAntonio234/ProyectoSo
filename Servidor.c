@@ -13,24 +13,16 @@ int contador;
 //Estructura necessaria para acceso excluyente
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
-<<<<<<< HEAD
-void* AtenderCliente(void* socket)
-{
-	int sock_conn, sock_listen, ret, * s;
-	s = (int*)socket;
-=======
 void *AtenderCliente (void *socket)
 {
 	int sock_conn, sock_listen, ret, *s;
 	s = (int *) socket;
->>>>>>> dac34113b4a25990eb65189489881b1a6df0f05b
 	sock_conn = *s;
 	char peticion[512];
 	char respuesta[512];
 	char respuesta1[512];
 
 	int terminar = 0;
-<<<<<<< HEAD
 	while (terminar == 0)
 	{
 		//Ahora recibimos su nombre, que dejamos en el buf
@@ -149,6 +141,8 @@ void *AtenderCliente (void *socket)
 	close(sock_conn);
 }
 
+//no podemos tener dis main modificar y convertir esto en una funcion hay cosas que arreglar
+//
 int main(int argc, char* argv[])
 {
 	int sock_conn, sock_listen;
@@ -277,21 +271,19 @@ int main(int argc, char* argv[])
 	close(sock_conn); 
 }
 
-int main (int argc, char *argv[])	
+int main(int argc, char* argv[])
 {
 	int sock_conn, sock_listen;
 	struct sockaddr_in serv_adr;
-	
+
 	//abrimos socket
 	if ((sock_listen = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 		printf("Error creant socket");
-	
->>>>>>> dac34113b4a25990eb65189489881b1a6df0f05b
+
 	//Fem el bind al port
 	//Inicalitza a zero serv_adr
 	memset(&serv_adr, 0, sizeof(serv_adr));
 	serv_adr.sin_family = AF_INET;
-<<<<<<< HEAD
 
 	//Asocia el socket a qualsevol IP de la maquina
 	//htonl formatea el numero que recibe al formato necesario
@@ -325,41 +317,41 @@ int main (int argc, char *argv[])
 		//Crear thread y decirle lo que tiene que hacer
 		pthread_create(&thread, NULL, AtenderCliente, &sockets[i]);
 		i = i + 1;
-=======
-	
-	//Asocia el socket a qualsevol IP de la maquina
-	//htonl formatea el numero que recibe al formato necesario
-	serv_adr.sin_addr.s_addr = htonl(INADDR_ANY);
-	
-	//escuchamos en el puerto 9050
-	serv_adr.sin_port = htons(9050);
-	
-	if (bind(sock_listen, (struct sockaddr *) &serv_adr, sizeof(serv_adr)) < 0)
-		printf ("Error en el bind");
-	
-	//Maximo de peticiones en la cola es de 3
-	if (listen(sock_listen, 3) < 0)
-		printf ("Error en el Listen");
-	
-	contador = 0;
-	int i;
-	int sockets[100];
-	
-	pthread_t thread;
-	i=0;
-	
-	for (;;){
-		printf ("Escuchando\n");
-		
-		sock_conn = accept(sock_listen, NULL, NULL);
-		
-		printf ("He recibido conexion\n");
-		
-		sockets[i]= sock_conn;
-		//Crear thread y decirle lo que tiene que hacer
-		pthread_create (&thread, NULL, AtenderCliente, &sockets[i]);
-		i=i+1;
->>>>>>> dac34113b4a25990eb65189489881b1a6df0f05b
+		====== =
+
+			//Asocia el socket a qualsevol IP de la maquina
+			//htonl formatea el numero que recibe al formato necesario
+			serv_adr.sin_addr.s_addr = htonl(INADDR_ANY);
+
+		//escuchamos en el puerto 9050
+		serv_adr.sin_port = htons(9050);
+
+		if (bind(sock_listen, (struct sockaddr*)&serv_adr, sizeof(serv_adr)) < 0)
+			printf("Error en el bind");
+
+		//Maximo de peticiones en la cola es de 3
+		if (listen(sock_listen, 3) < 0)
+			printf("Error en el Listen");
+
+		contador = 0;
+		int i;
+		int sockets[100];
+
+		pthread_t thread;
+		i = 0;
+
+		for (;;) {
+			printf("Escuchando\n");
+
+			sock_conn = accept(sock_listen, NULL, NULL);
+
+			printf("He recibido conexion\n");
+
+			sockets[i] = sock_conn;
+			//Crear thread y decirle lo que tiene que hacer
+			pthread_create(&thread, NULL, AtenderCliente, &sockets[i]);
+			i = i + 1;
+		}
 	}
 }
 
@@ -429,7 +421,7 @@ int DameTablaJugadores(char nombre[50])
 
 	//Creamos una conexion al servidor MYSQL 
 	conn = mysql_init(NULL);
-<<<<<<< HEAD
+
 	if (conn == NULL) {
 		printf("Error al crear la conexion: %u %s\n",
 			mysql_errno(conn), mysql_error(conn));
@@ -458,7 +450,6 @@ int DameTablaJugadores(char nombre[50])
 	if(err!=0){
 		printf("Error al consultar los datos de la base %u%s\n",
 			   mysql_errno(conn),mysql_error(conn));
->>>>>>> dac34113b4a25990eb65189489881b1a6df0f05b
 		exit(1);
 	}
 
@@ -501,7 +492,6 @@ int DameTablaJugadores(char nombre[50])
 
 int DameID(char nombre[50])
 {
-<<<<<<< HEAD
 	MYSQL* conn;
 	int err;
 	// Estructura especial para almacenar resultados de consultas 
@@ -596,6 +586,3 @@ int DameID(char nombre[50])
 			mysql_close (conn);
 			exit(0);
 }
-
-
->>>>>>> dac34113b4a25990eb65189489881b1a6df0f05b

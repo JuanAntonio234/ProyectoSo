@@ -370,7 +370,7 @@ GameObject:
   - component: {fileID: 407305914}
   - component: {fileID: 407305913}
   m_Layer: 0
-  m_Name: Button
+  m_Name: Consulta1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -734,7 +734,7 @@ GameObject:
   - component: {fileID: 1117004394}
   - component: {fileID: 1117004393}
   m_Layer: 0
-  m_Name: Button (1)
+  m_Name: Consulta2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1067,7 +1067,7 @@ GameObject:
   - component: {fileID: 1576397895}
   - component: {fileID: 1576397894}
   m_Layer: 0
-  m_Name: Button (2)
+  m_Name: Consulta3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
