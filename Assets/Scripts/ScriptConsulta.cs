@@ -4,6 +4,11 @@ using UnityEngine;
 using MySql.Data.MySqlClient;
 using MySqlConnector;
 using UnityEngine.UI;
+using System;
+using System.Net.Sockets;
+using System.Text;
+using System.Net;
+using UnityEngine.UI;
 
 public class ConsultaMySQL : MonoBehaviour
 {
