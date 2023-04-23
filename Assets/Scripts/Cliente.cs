@@ -32,7 +32,7 @@ public class Cliente : MonoBehaviour
         }
         catch(SocketException ex)
         {
-            Console.WriteLine("No se ha podido conectar con el servudor" );
+            Debug.Log("No se ha podido conectar con el servidor: " + ex.Message);
 
             return;
         }
