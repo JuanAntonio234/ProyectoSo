@@ -8,581 +8,577 @@
 #include <mysql.h>
 #include <pthread.h>
 
-int contador;
-
-//Estructura necessaria para acceso excluyente
+//Estructura necessaria para login excluyente
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
-void *AtenderCliente (void *socket)
+typedef struct {
+	char nombre[20];
+	int socket;
+}Conectado;
+
+typedef struct {
+	Conectado conectados [100];
+	int num;
+} ListaConectados;
+
+ListaConectados lista;
+
+int sockets[100];
+
+void *atenderCliente(void *socket)
 {
-	int sock_conn, sock_listen, ret, *s;
+	int sock_conn, ret;
+	int *s;
 	s = (int *) socket;
-	sock_conn = *s;
+	sock_conn = *s;	
+	
 	char peticion[512];
 	char respuesta[512];
-	char respuesta1[512];
-
-	int terminar = 0;
-	while (terminar == 0)
+	char contestacion[512];
+	char contrasena[20];
+	char nombre[25];
+	char fecha[11];
+	char conectados[300];
+	int conexion = 0;
+	int r;
+	int i;
+	
+	while(conexion == 0)
 	{
-		//Ahora recibimos su nombre, que dejamos en el buf
-		ret = read(sock_conn, peticion, sizeof(peticion));
-		printf("Recibido\n");
-
-		//Tenemos que aÃ±adir la marca de fin de string para que no escriba lo que hay en el buffer
-		peticion[ret] = '\0';
-
-		//Escribinos el nombre en consola
-
-		printf("Peticion: %s\n", peticion);
-
-		//Vamos a ver que nos pide la peticion
-		char* p = strtok(peticion, "/");
-		char codigo[10];
-		char NOMBRE[50];
-		char PASSWORD[15];
-		if (codigo != 0)
-		{
-			p = strtok(NULL, "/");
-
-			strcpy(NOMBRE, p);
-			printf("Codigo: %s, Nombre: %s\n", codigo, NOMBRE);
+		ret=read(sock_conn,peticion, sizeof(peticion));
+		printf ("Recibido\n");
+		peticion[ret]='\0';
+		int error = 1;
+		int codigo = 9999;
+		char *p;
+		
+		if(strlen(peticion) < 2){
+			error = 0;
 		}
-		if (codigo == 0) //peticion de desconexion
-		{
-			terminar = 1;
+		
+		if (strcmp(peticion, "") != 0){
+			printf ("Peticion: %s\n",peticion);
+			p = strtok(peticion, "-");
+			codigo = atoi(p);
+		}	
+		
+		if (error == 0){
+			codigo = 9999;
 		}
-		else if (codigo == 1)
+		
+		if(codigo == 0) //LOGIN
 		{
-			p = strtok(NULL, "/");
-			strcpy(PASSWORD, p);
-			printf("Codigo: %s, Nombre: %s, Password: %s\n", codigo, NOMBRE, PASSWORD);
-
-			MYSQL* conn;
-			int err;
-
-			MYSQL_RES* resultado;
-			MYSQL_ROW row;
-
-			char consulta[100];
-
-			conn = mysql_init(NULL);
-			if (conn == NULL) {
-				printf("Error al crear la conexion: %u %s\n",
-					mysql_errno(conn), mysql_error(conn));
-				exit(1);
-			}
-
-			conn = mysql_real_connect(conn, "localhost", "root", "mysql", "Stick Fight Game", 0, NULL, 0);
-			if (conn == NULL) {
-				printf("Error al inicializar la conexion: %u %s\n",
-					mysql_errno(conn), mysql_error(conn));
-				exit(1);
-			}
-
-			sprintf(consulta, "SELECT JUGADOR.NOMBRE, JUGADOR.PASSWORD FROM JUGADOR WHERE (JUGADOR.NOMBRE='%s' AND JUGADOR.PASSWORD='%s')", NOMBRE, PASSWORD);
-
-			err = mysql_query(conn, consulta);
-			if (err != 0) {
-				printf("Error al consultar datos de la base %u %s\n",
-					mysql_errno(conn), mysql_error(conn));
-				exit(1);
-			}
-			printf("aqui\n");
-			resultado = mysql_store_result(conn);
-
-			printf("aqui\n", resultado);
-
-			row = mysql_fetch_row(resultado);
-			printf(row[0]);
-
-
-			if (row[0] == NULL)
+			pthread_mutex_lock(&mutex);
+			p = strtok(NULL, "-");
+			strcpy(nombre, p);
+			printf("Codigo de conexion: %d\n", r);
+			p = strtok(NULL, "-");
+			strcpy(contrasena, p);
+			printf("Codigo: %d, Nombre: %s y Contrase￱a: %s\n", codigo, nombre, contrasena);
+			Login(nombre, contrasena, contestacion);
+			if(strcmp (contestacion, "Error") != 0)
+				r = Conectar(&lista, nombre, socket);
+			DameConectados(&lista, conectados);
+			sprintf(respuesta, "%s", contestacion);
+			write (sock_conn,respuesta,strlen(respuesta));
+			pthread_mutex_unlock(&mutex);
+		}
+		
+		else if(codigo == 4) //REGISTRAR
+		{
+			pthread_mutex_lock(&mutex);
+			p = strtok(NULL, "-");
+			strcpy(nombre, p);
+			p = strtok(NULL, "-");
+			strcpy(contrasena, p);
+			printf("Codigo: %d, Fecha: %s y Nombre: %s\n", codigo, contrasena, nombre);
+			Registrar(nombre, contrasena, contestacion);
+			if(strcmp (contestacion, "Error") != 0)
+				r = Conectar(&lista, nombre, socket);
+			DameConectados(&lista, conectados);
+			sprintf(respuesta, "%s", contestacion);
+			write (sock_conn,respuesta,strlen(respuesta));
+			pthread_mutex_unlock(&mutex);
+		}
+		
+		else if(codigo == 5) //DESCONECTAR
+		{
+			pthread_mutex_lock(&mutex);
+			p = strtok(NULL, "-");
+			strcpy(nombre, p);
+			conexion = 1;
+			printf("Desconectando a %s\n", nombre);
+			r = Desconectar(&lista, nombre);
+			printf("Codigo de desconexion: %d\n", r);
+			DameConectados(&lista, conectados);
+			close(sock_conn);
+			pthread_mutex_unlock(&mutex);
+		}
+		
+		else if(codigo == 1)
+		{
+			pthread_mutex_lock(&mutex);
+			p = strtok(NULL, "-");
+			strcpy(fecha, p);
+			printf("Codigo: %d, Fecha: %s\n", codigo, fecha);
+			NombreJugadorDuracionMayor3(contestacion);
+			sprintf(respuesta, "%s", contestacion);
+			write (sock_conn,respuesta,strlen(respuesta));
+			pthread_mutex_unlock(&mutex);
+		}
+		
+		else if(codigo == 2)
+		{
+			pthread_mutex_lock(&mutex);
+			p = strtok(NULL, "-");
+			strcpy(fecha, p);		
+			printf("Codigo: %d, Fecha: %s\n", codigo, fecha);
+			JugadoresJugadoMismoDiaPere(contestacion);
+			sprintf(respuesta, "%s", contestacion);
+			write (sock_conn,respuesta,strlen(respuesta));
+			pthread_mutex_unlock(&mutex);
+		}
+		
+		/*else if(codigo == 3)
+		{
+			pthread_mutex_lock(&mutex);
+			p = strtok(NULL, "-");
+			strcpy(fecha, p);		
+			printf("Codigo: %d, Fecha: %s\n", codigo, fecha);
+			DameID(nombre, contestacion);
+			sprintf(respuesta, "%s", contestacion);
+			write (sock_conn,respuesta,strlen(respuesta));
+			pthread_mutex_unlock(&mutex);
+		}*/
+		
+		else if (codigo == 1 || codigo == 4 || codigo == 5)
+		{
+			pthread_mutex_lock(&mutex);
+			int j;
+			DameConectados(&lista, conectados);
+			sprintf(respuesta, "6-%s", conectados);
+			printf("%s\n", respuesta);
+			pthread_mutex_unlock(&mutex);
+			for (j = 0; j < lista.num; j++)
 			{
-				printf("No se han obtenido datos en la consulta\n");
-				strcpy(respuesta1, "NO");
+				write (sockets[j],respuesta,strlen(respuesta));
 			}
-
-			else
-			{
-				strcpy(respuesta1, "SI");
-			}
-
-			write(sock_conn, respuesta1, strlen(respuesta1));
-
-			mysql_close(conn);
-
 		}
-		else if (codigo == 2)
-		{
-			sprintf(respuesta, "%d", DamePartidasGanadas(NOMBRE));
-			write(sock_conn, respuesta, strlen(respuesta));
+		else{
+			printf("Peticion no existe\n");
 		}
-		else if (codigo == 3)
-		{
-			sprintf(respuesta, "%d", DameTablaJugadores(NOMBRE));
-			write(sock_conn, respuesta, strlen(respuesta));
-		}
-		else if (codigo == 4)
-		{
-			sprintf(respuesta, "%d", DameID(NOMBRE));
-			write(sock_conn, respuesta, strlen(respuesta));
-		}
-		printf("Respuesta: %s\n", respuesta);
-		//lo enviamos
+	}		
+}	
 
-		if ((codigo == 2) || (codigo == 3) || (codigo == 4))
-		{
-			pthread_mutex_lock(&mutex); //no interrumpas
-			contador = contador + 1;
-			pthread_mutex_unlock(&mutex); //ya puedes interrumpir
-		}
-	}
-	close(sock_conn);
-}
-
-//no podemos tener dis main modificar y convertir esto en una funcion hay cosas que arreglar
-//
-int main(int argc, char* argv[])
+int main(int argc, char *argv[]) 
 {
 	int sock_conn, sock_listen;
 	struct sockaddr_in serv_adr;
-
-	//abrimos socket
+	pthread_t thread;
+	lista.num = 0;
+	int conexion = 0;
+	int puerto = 5050;
+	int i = 0;
+	
 	if ((sock_listen = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-		printf("Error creant socket");
-
-=======
-	while(terminar == 0)
-	{
-			//Ahora recibimos su nombre, que dejamos en el buf
-			ret=read(sock_conn,peticion, sizeof(peticion));
-			printf ("Recibido\n");
-			
-			//Tenemos que aÃ±adir la marca de fin de string para que no escriba lo que hay en el buffer
-			peticion[ret]='\0';
-			
-			//Escribinos el nombre en consola
-			
-			printf("Peticion: %s\n", peticion);
-			
-			//Vamos a ver que nos pide la peticion
-			char *p = strtok(peticion, "/");
-			char codigo[10];
-			char NOMBRE[50];
-			char PASSWORD[15];
-			if (codigo !=0)
-			{
-				p = strtok (NULL, "/");
-				
-				strcpy(NOMBRE, p);
-				printf ("Codigo: %s, Nombre: %s\n", codigo, NOMBRE);
-			}
-			if (codigo ==0) //peticion de desconexion
-			{
-				terminar = 1;
-			}
-			else if(codigo == 1)
-			{
-				p = strtok (NULL, "/");
-				strcpy(PASSWORD, p);
-				printf ("Codigo: %s, Nombre: %s, Password: %s\n", codigo, NOMBRE, PASSWORD);
-				
-				MYSQL *conn;
-				int err;
-				
-				MYSQL_RES *resultado;
-				MYSQL_ROW row;
-				
-				char consulta [100];
-				
-				conn = mysql_init(NULL);
-				if (conn==NULL) {
-					printf ("Error al crear la conexion: %u %s\n", 
-							mysql_errno(conn), mysql_error(conn));
-					exit (1);
-				}
-				
-				conn = mysql_real_connect (conn, "localhost","root", "mysql", "Stick Fight Game",0, NULL, 0);
-				if (conn==NULL) {
-					printf ("Error al inicializar la conexion: %u %s\n", 
-							mysql_errno(conn), mysql_error(conn));
-					exit (1);
-				}
-				
-				sprintf(consulta, "SELECT JUGADOR.NOMBRE, JUGADOR.PASSWORD FROM JUGADOR WHERE (JUGADOR.NOMBRE='%s' AND JUGADOR.PASSWORD='%s')", NOMBRE, PASSWORD);
-				
-				err=mysql_query (conn, consulta);
-				if (err!=0) {
-					printf ("Error al consultar datos de la base %u %s\n",
-							mysql_errno(conn), mysql_error(conn));
-					exit (1);
-				}
-				printf("aqui\n");
-				resultado = mysql_store_result (conn);
-				
-				printf("aqui\n",resultado);
-				
-				row = mysql_fetch_row (resultado);
-				printf(row[0]);
-				
-				
-				if (row[0] == NULL)
-				{
-					printf ("No se han obtenido datos en la consulta\n");
-					strcpy(respuesta1, "NO");
-				}
-				
-				else
-				{	
-					strcpy(respuesta1, "SI");
-				}
-				
-				write (sock_conn, respuesta1, strlen(respuesta1));
-				
-				mysql_close (conn);
-				
-			}
-			else if(codigo == 2)
-			{
-				sprintf (respuesta,"%d",DamePartidasGanadas(NOMBRE));
-				write (sock_conn, respuesta, strlen(respuesta));
-			}
-			else if(codigo == 3)
-			{
-				sprintf (respuesta,"%d",DameTablaJugadores(NOMBRE));
-				write (sock_conn, respuesta, strlen(respuesta));
-			}
-			else if(codigo == 4)
-			{
-				sprintf (respuesta,"%d",DameID(NOMBRE));
-				write (sock_conn, respuesta, strlen(respuesta));
-			}
-			printf ("Respuesta: %s\n", respuesta);
-			//lo enviamos
-			
-			if ((codigo == 2)||(codigo == 3)||(codigo == 4))
-			{
-				pthread_mutex_lock( &mutex ); //no interrumpas
-				contador =  contador+1;
-				pthread_mutex_unlock( &mutex ); //ya puedes interrumpir
-			}
-	}
-	close(sock_conn); 
-}
-
-int main(int argc, char* argv[])
-{
-	int sock_conn, sock_listen;
-	struct sockaddr_in serv_adr;
-
-	//abrimos socket
-	if ((sock_listen = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-		printf("Error creant socket");
-
-	//Fem el bind al port
-	//Inicalitza a zero serv_adr
+		printf("Error al crear socket\n");
+	
 	memset(&serv_adr, 0, sizeof(serv_adr));
 	serv_adr.sin_family = AF_INET;
-
-	//Asocia el socket a qualsevol IP de la maquina
-	//htonl formatea el numero que recibe al formato necesario
-	serv_adr.sin_addr.s_addr = htonl(INADDR_ANY);
-
-	//escuchamos en el puerto 9050
-	serv_adr.sin_port = htons(9050);
-
-	if (bind(sock_listen, (struct sockaddr*)&serv_adr, sizeof(serv_adr)) < 0)
-		printf("Error en el bind");
-
-	//Maximo de peticiones en la cola es de 3
+	serv_adr.sin_addr.s_addr = htonl(INADDR_ANY); 
+	serv_adr.sin_port = htons(puerto);
+	if (bind(sock_listen, (struct sockaddr *) &serv_adr, sizeof(serv_adr)) < 0)
+		printf ("Error en el bind\n");
+	
 	if (listen(sock_listen, 3) < 0)
-		printf("Error en el Listen");
-
-	contador = 0;
-	int i;
-	int sockets[100];
-
-	pthread_t thread;
-	i = 0;
-
-	for (;;) {
+		printf("Error en el Listen\n");
+	int rc;
+	while(conexion == 0)
+	{
 		printf("Escuchando\n");
-
+		
 		sock_conn = accept(sock_listen, NULL, NULL);
-
-		printf("He recibido conexion\n");
-
+		printf("Conexion recibida\n");
+		
 		sockets[i] = sock_conn;
-		//Crear thread y decirle lo que tiene que hacer
-		pthread_create(&thread, NULL, AtenderCliente, &sockets[i]);
-		i = i + 1;
-		====== =
+		
+		rc = pthread_create (&thread, NULL, *atenderCliente , &sockets[i]);
+		printf("Codigo %d = %s\n", rc, strerror(rc));
+		
+		i++;
+	}
+	return 0;
+}
 
-			//Asocia el socket a qualsevol IP de la maquina
-			//htonl formatea el numero que recibe al formato necesario
-			serv_adr.sin_addr.s_addr = htonl(INADDR_ANY);
-
-		//escuchamos en el puerto 9050
-		serv_adr.sin_port = htons(9050);
-
-		if (bind(sock_listen, (struct sockaddr*)&serv_adr, sizeof(serv_adr)) < 0)
-			printf("Error en el bind");
-
-		//Maximo de peticiones en la cola es de 3
-		if (listen(sock_listen, 3) < 0)
-			printf("Error en el Listen");
-
-		contador = 0;
-		int i;
-		int sockets[100];
-
-		pthread_t thread;
-		i = 0;
-
-		for (;;) {
-			printf("Escuchando\n");
-
-			sock_conn = accept(sock_listen, NULL, NULL);
-
-			printf("He recibido conexion\n");
-
-			sockets[i] = sock_conn;
-			//Crear thread y decirle lo que tiene que hacer
-			pthread_create(&thread, NULL, AtenderCliente, &sockets[i]);
-			i = i + 1;
-		}
+void DameConectados(ListaConectados * lista, char conectados[300])
+{
+	int i;
+	sprintf (conectados, "%d", lista->num);
+	for (i = 0; i < lista->num; i++)
+	{
+		sprintf(conectados, "%s-%s", conectados, lista->conectados[i].nombre);
 	}
 }
 
-int DamePartidasGanadas(char nombre[50])
+int DamePos(ListaConectados * lista, char nombre[20])
 {
-	MYSQL* conn;
-	int err;
-	// Estructura especial para almacenar resultados de consultas 
-	MYSQL_RES* resultado;
-	MYSQL_ROW row;
-
-	char consulta[100];
-
-	//Creamos una conexion al servidor MYSQL 
-	conn = mysql_init(NULL);
-	if (conn == NULL) {
-		printf("Error al crear la conexion: %u %s\n",
-			mysql_errno(conn), mysql_error(conn));
-		exit(1);
+	int i = 0;
+	int encontrado = 0;
+	printf("Lista nombre : %s\n", lista->conectados[i].nombre);
+	while ((i<lista->num) && !encontrado)
+	{
+		if (strcmp(lista->conectados[i].nombre, nombre) == 0)
+			encontrado = 1;
+		if (!encontrado)
+			i++;
 	}
-	//inicializar la conexin
-	conn = mysql_real_connect(conn, "localhost", "root", "mysql", "Stick Fight Game", 0, NULL, 0);
-	if (conn == NULL) {
-		printf("Error al inicializar la conexion: %u %s\n",
-			mysql_errno(conn), mysql_error(conn));
-		exit(1);
-	}
+	if (encontrado)
+		return i;
+	else 
+		return -1;
+}
 
-	//consulta SQL
-	strcpy(consulta, "SELECT COUNT(*) FROM PARTIDA WHERE PARTIDA.GANADOR = '");
-	strcat(consulta, nombre);
-	strcat(consulta, "'");
-
-	//Para comprobar errores en la consulta
-	err = mysql_query(conn, consulta);
-	if (err != 0) {
-		printf("Error al consultar datos de la base %u %s\n",
-			mysql_errno(conn), mysql_error(conn));
-		exit(1);
-	}
-
-	//recogemos el resultado de la consulta
-	resultado = mysql_store_result(conn);
-	row = mysql_fetch_row(resultado);
-
-	//Recogemos el resultado
-
-	if (row == NULL || atoi(row[0]) == 0)
+int Desconectar(ListaConectados * lista, char nombre[20])
+{
+	int pos = DamePos(lista, nombre);
+	if (pos == -1)
 		return -1;
 	else
-		return atoi(row[0]);
-
-	mysql_close(conn);
-	exit(0);
-
+	{
+		int i;
+		for (i = pos; i < lista->num-1; i++)
+		{
+			lista->conectados[i] = lista->conectados[i+1];
+		}
+		lista->num--;
+		return 0;
+	}
 }
 
-int DameTablaJugadores(char nombre[50])
+int Conectar(ListaConectados *lista, char nombre[20], int socket)
 {
-	MYSQL* conn;
+	if (lista->num == 100)
+		return -1;
+	else
+	{
+		strcpy(lista->conectados[lista->num].nombre, nombre);
+		lista->conectados[lista->num].socket = socket;
+		lista->num++;
+		printf("Lista numero : %d\n", lista->num);
+		return 0;
+	}
+}
+
+
+	
+void Login(char nombre[25], char contrasena[25], char respuesta[512])
+{
+	MYSQL *conn;
 	int err;
-	// Estructura especial para almacenar resultados de consultas 
-	MYSQL_RES* resultado;
+	MYSQL_RES *resultado;
 	MYSQL_ROW row;
-
-	char consulta[100];
-
-	//Creamos una conexion al servidor MYSQL 
+	
+	int login;
+	char consulta[500];
+	
 	conn = mysql_init(NULL);
-
-	if (conn == NULL) {
-		printf("Error al crear la conexion: %u %s\n",
-			mysql_errno(conn), mysql_error(conn));
-=======
 	if (conn==NULL) {
 		printf ("Error al crear la conexion: %u %s\n", 
 				mysql_errno(conn), mysql_error(conn));
 		exit (1);
 	}
 	
-	//inicializar la conexion
-	conn = mysql_real_connect (conn, "localhost","root", "mysql", "Stick Fight Game",0, NULL, 0);
-	if (conn==NULL) {
+	conn = mysql_real_connect (conn, "localhost","root", "mysql", "Stick Fight Game", 0, NULL, 0);
+	if (conn==NULL)
+	{
 		printf ("Error al inicializar la conexion: %u %s\n", 
 				mysql_errno(conn), mysql_error(conn));
 		exit (1);
 	}
 	
-	//consulta SQL
-	strcpy (consulta, "SELECT * FROM JUGADOR");
-	strcat (consulta, nombre);
-	strcat (consulta, "'");
+	err=mysql_query(conn, "use BasedeDatos;");
+	if (err!=0)
+	{
+		printf ("Error al acceder a la base de datos %u %s\n", 
+				mysql_errno(conn), mysql_error(conn));
+		exit (1);
+	}
 	
-	//Para comprobar errores en la consulta
-	err=mysql_query(conn, consulta);
-	if(err!=0){
-		printf("Error al consultar los datos de la base %u%s\n",
-			   mysql_errno(conn),mysql_error(conn));
-		exit(1);
+	strcpy (consulta,"SELECT ID from JUGADOR where NOMBRE = '");
+	strcat (consulta, nombre);
+	strcat (consulta,"' and PASSWORD = '");
+	strcat (consulta, contrasena);
+	strcat (consulta,"';");
+	err=mysql_query (conn, consulta); 
+	if (err!=0) 
+	{
+		printf ("Error al consultar datos de la base %u %s\n",
+				mysql_errno(conn), mysql_error(conn));
+		exit (1);
 	}
-
-	//inicializar la conexion
-	conn = mysql_real_connect(conn, "localhost", "root", "mysql", "Stick Fight Game", 0, NULL, 0);
-	if (conn == NULL) {
-		printf("Error al inicializar la conexion: %u %s\n",
-			mysql_errno(conn), mysql_error(conn));
-		exit(1);
-	}
-
-	//consulta SQL
-	strcpy(consulta, "SELECT * FROM JUGADOR");
-	strcat(consulta, nombre);
-	strcat(consulta, "'");
-
-	//Para comprobar errores en la consulta
-	err = mysql_query(conn, consulta);
-	if (err != 0) {
-		printf("Error al consultar los datos de la base %u%s\n",
-			mysql_errno(conn), mysql_error(conn));
-		exit(1);
-	}
-	resultado = mysql_store_result(conn);
-
-	row = mysql_fetch_row(resultado);
+	
+	resultado = mysql_store_result (conn);
+	row = mysql_fetch_row (resultado);
 	if (row == NULL)
-		printf("No se han obtenido datos\n");
+	{
+		printf ("Nombre o contrase￱a incorrectos\n");
+		login = -1;
+		sprintf(respuesta, "Error");
+	}	
+	
 	else
-		while (row != NULL) {
-			printf("ID: %s,Nombre: %s,Password: %s, paridas_ganadas&d,partidas_perdidas%d\n", row[0], row[1], row[2]);
-		}
-	//obtenemos la siguiente fila
-	row = mysql_fetch_row(resultado);
-
-	mysql_close(conn);
-	exit(0);
+	{
+		printf ("Ha iniciado sesi￳n el usuario con id: %s\n", row[0]);
+		login = 0;
+		sprintf(respuesta, "0-%d", login);
+	}
 }
 
-
-int DameID(char nombre[50])
+void Registrar(char nombre[25], char contrasena[25], char respuesta[512])
 {
-	MYSQL* conn;
+	MYSQL *conn;
 	int err;
-	// Estructura especial para almacenar resultados de consultas 
-	MYSQL_RES* resultado;
+	MYSQL_RES *resultado;
 	MYSQL_ROW row;
-	char ID[10];
-	char consulta[80];
-	//Creamos una conexion al servidor MYSQL 
+	
+	char consulta[500];
+	int registro;
+	int numJ;
+	
 	conn = mysql_init(NULL);
-	if (conn == NULL) {
-		printf("Error al crear la conexionn: %u %s\n",
-			mysql_errno(conn), mysql_error(conn));
-		exit(1);
+	if (conn==NULL) 
+	{
+		printf ("Error al crear la conexion: %u %s\n", 
+				mysql_errno(conn), mysql_error(conn));
+		exit (1);
 	}
-	//inicializar la conexion
-	conn = mysql_real_connect(conn, "localhost", "root", "mysql", "Stick Fight Game", 0, NULL, 0);
-	if (conn == NULL) {
-		printf("Error al inicializar la conexione: %u %s\n",
-			mysql_errno(conn), mysql_error(conn));
-		exit(1);
+	
+	conn = mysql_real_connect (conn, "localhost","root", "mysql", "Stick Fight Game", 0, NULL, 0);
+	if (conn==NULL)
+	{
+		printf ("Error al inicializar la conexion: %u %s\n", 
+				mysql_errno(conn), mysql_error(conn));
+		exit (1);
 	}
-
-	// construimos la consulta SQL
-	strcpy(consulta, "SELECT ID FROM JUGADOR WHERE NOMBRE = '");
-	strcat(consulta, nombre);
-	strcat(consulta, "'");
-	// hacemos la consulta 
-	err = mysql_query(conn, consulta);
-	if (err != 0) {
-		printf("Error al consultar datos de la base %u %s\n",
-			mysql_errno(conn), mysql_error(conn));
-		exit(1);
+	
+	err=mysql_query(conn, "use BasedeDatos;");
+	if (err!=0)
+	{
+		printf ("Error al acceder a la base de datos %u %s\n", 
+				mysql_errno(conn), mysql_error(conn));
+		exit (1);
 	}
-	//recogemos el resultado de la consulta 
-	resultado = mysql_store_result(conn);
-	row = mysql_fetch_row(resultado);
-	if (row == NULL)
-		return -1;
-
+	
+	err=mysql_query (conn, "SELECT count(ID) from JUGADOR;"); 
+	resultado = mysql_store_result (conn);
+	row = mysql_fetch_row (resultado);
+	
+	numJ = atoi(row[0]);
+	numJ++;
+	printf("Este es el numero: %d\n", numJ);
+	
+	int numero = numJ;
+	sprintf(consulta, "insert into JUGADOR values (%d,'%s','%s');", numJ, nombre, contrasena);
+	err=mysql_query (conn, consulta); 
+	if (err!=0) 
+	{
+		printf ("Error al consultar datos de la base %u %s\n",
+				mysql_errno(conn), mysql_error(conn));
+		exit (1);
+		sprintf(respuesta, "Error");
+	}
+	
 	else
-		// El resultado debe ser una matriz con una sola fila y una columna que contiene el nivel
-		return atoi(row[0]);
-	// cerrar la conexion con el servidor MYSQL 
-	mysql_close(conn);
-	exit(0);
+	{
+		sprintf(respuesta, "4-0");
+	}
 }
 
-=======
-			MYSQL *conn;
-			int err;
-			// Estructura especial para almacenar resultados de consultas 
-			MYSQL_RES *resultado;
-			MYSQL_ROW row;
-			char ID[10];
-			char consulta [80];
-			//Creamos una conexion al servidor MYSQL 
-			conn = mysql_init(NULL);
-			if (conn==NULL) {
-				printf ("Error al crear la conexionn: %u %s\n", 
-						mysql_errno(conn), mysql_error(conn));
-				exit (1);
-			}
-			//inicializar la conexion
-			conn = mysql_real_connect (conn, "localhost","root", "mysql", "Stick Fight Game", 0, NULL, 0);
-			if (conn==NULL) {
-				printf ("Error al inicializar la conexione: %u %s\n", 
-						mysql_errno(conn), mysql_error(conn));
-				exit (1);
-			}
-			
-			// construimos la consulta SQL
-			strcpy (consulta,"SELECT ID FROM JUGADOR WHERE NOMBRE = '"); 
-			strcat (consulta, nombre);
-			strcat (consulta,"'");
-			// hacemos la consulta 
-			err=mysql_query (conn, consulta); 
-			if (err!=0) {
-				printf ("Error al consultar datos de la base %u %s\n",
-						mysql_errno(conn), mysql_error(conn));
-				exit (1);
-			}
-			//recogemos el resultado de la consulta 
-			resultado = mysql_store_result (conn); 
+void NombreJugadorDuracionMayor3(char respuesta[512])
+{
+	MYSQL *conn;
+	int err;
+	MYSQL_RES *resultado;
+	MYSQL_ROW row;
+	
+	char nombres[50];
+	char consulta[500];
+	
+	conn = mysql_init(NULL);
+	if (conn==NULL) {
+		printf ("Error al crear la conexion: %u %s\n", 
+				mysql_errno(conn), mysql_error(conn));
+		exit (1);
+	}
+	
+	conn = mysql_real_connect (conn, "localhost","root", "mysql", "Stick Fight Game", 0, NULL, 0);
+	if (conn==NULL)
+	{
+		printf ("Error al inicializar la conexion: %u %s\n", 
+				mysql_errno(conn), mysql_error(conn));
+		exit (1);
+	}
+	
+	err=mysql_query(conn, "use BasedeDatos;");
+	if (err!=0)
+	{
+		printf ("Error al acceder a la base de datos %u %s\n", 
+				mysql_errno(conn), mysql_error(conn));
+		exit (1);
+	}
+	
+	strcpy (consulta,"SELECT JUGADOR.NOMBRE from JUGADOR, PARTIDA where PARTIDA.DURACION > 3 and JUGADOR.ID = PARTIDA.GANADOR");
+	err=mysql_query (conn, consulta); 
+	if (err!=0) {
+		printf ("Error al consultar datos de la base %u %s\n",
+				mysql_errno(conn), mysql_error(conn));
+		exit (1);
+	}
+	
+	resultado = mysql_store_result (conn);
+	row = mysql_fetch_row (resultado);
+	if (row == NULL)
+	{
+		printf ("No se han obtenido datos en la consulta\n");
+		sprintf(respuesta, "Error");
+	}
+	
+	else
+	{
+		strcpy(nombres, row[0]);
+		row = mysql_fetch_row (resultado);
+		while(row!=NULL)
+		{
+			strcat (nombres, "-");
+			strcat (nombres, row[0]);
 			row = mysql_fetch_row (resultado);
-			if (row == NULL)
-				return -1;
-			
-			else
-				// El resultado debe ser una matriz con una sola fila y una columna que contiene el nivel
-				return atoi(row[0]);
-			// cerrar la conexion con el servidor MYSQL 
-			mysql_close (conn);
-			exit(0);
+		}
+		strcat (nombres, "\n");
+		printf(nombres);
+		sprintf(respuesta, "1-%s", nombres);
+	}
 }
+
+void JugadoresJugadoMismoDiaPere(char respuesta[512])
+{
+	MYSQL *conn;
+	int err;
+	MYSQL_RES *resultado;
+	MYSQL_ROW row;
+	
+	char nombres[50];
+	char consulta[500];
+	
+	conn = mysql_init(NULL);
+	if (conn==NULL) {
+		printf ("Error al crear la conexion: %u %s\n", 
+				mysql_errno(conn), mysql_error(conn));
+		exit (1);
+	}
+	
+	conn = mysql_real_connect (conn, "localhost","root", "mysql", "Stick Fight Game", 0, NULL, 0);
+	if (conn==NULL)
+	{
+		printf ("Error al inicializar la conexion: %u %s\n", 
+				mysql_errno(conn), mysql_error(conn));
+		exit (1);
+	}
+	
+	err=mysql_query(conn, "use BasedeDatos;");
+	if (err!=0)
+	{
+		printf ("Error al acceder a la base de datos %u %s\n", 
+				mysql_errno(conn), mysql_error(conn));
+		exit (1);
+	}
+	
+	strcpy (consulta,"SELECT JUGADOR.NOMBRE from JUGADOR, PARTIDA, Lista_Partidas where JUGADOR.ID = Lista_Partidas.idJ and PARTIDA.ID = Lista_Partidas.idP and PARTIDA.FECHA = (SELECT FECHA from PARTIDA, JUGADOR, Lista_Partidas where JUGADOR.NOMBRE = 'Pere' and JUGADOR.ID = Lista_Partidas.MVP and PARTIDA.ID = Lista_Partidas.idP");
+	err=mysql_query (conn, consulta); 
+	if (err!=0) {
+		printf ("Error al consultar datos de la base %u %s\n",
+				mysql_errno(conn), mysql_error(conn));
+		exit (1);
+	}
+	
+	resultado = mysql_store_result (conn);
+	row = mysql_fetch_row (resultado);
+	if (row == NULL)
+	{
+		printf ("No se han obtenido datos en la consulta\n");
+		sprintf(respuesta, "Error");
+	}
+	
+	else
+	{
+		strcpy(nombres, row[0]);
+		row = mysql_fetch_row (resultado);
+		while(row!=NULL)
+		{
+			strcat (nombres, "-");
+			strcat (nombres, row[0]);
+			row = mysql_fetch_row (resultado);
+		}
+		strcat (nombres, "\n");
+		printf(nombres);
+		sprintf(respuesta, "2-%s", nombres);
+	}
+}
+
+/*void DameID(char nombre[50], char respuesta[512})
+{
+	MYSQL *conn;
+	int err;
+	MYSQL_RES *resultado;
+	MYSQL_ROW row;
+	
+	char ID[10];
+	char consulta[500];
+	
+	conn = mysql_init(NULL);
+	if (conn==NULL) {
+		printf ("Error al crear la conexion: %u %s\n", 
+				mysql_errno(conn), mysql_error(conn));
+		exit (1);
+	}
+	
+	conn = mysql_real_connect (conn, "localhost","root", "mysql", "Stick Fight Game", 0, NULL, 0);
+	if (conn==NULL)
+	{
+		printf ("Error al inicializar la conexion: %u %s\n", 
+				mysql_errno(conn), mysql_error(conn));
+		exit (1);
+	}
+	
+	err=mysql_query(conn, "use BasedeDatos;");
+	if (err!=0)
+	{
+		printf ("Error al acceder a la base de datos %u %s\n", 
+				mysql_errno(conn), mysql_error(conn));
+		exit (1);
+	}
+	
+	strcpy (consulta,"SELECT ID FROM JUGADOR WHERE NOMBRE = '"); 
+	strcat (consulta, nombre);
+	strcat (consulta,"'");
+	err=mysql_query (conn, consulta); 
+	
+	if (err!=0) {
+		printf ("Error al consultar datos de la base %u %s\n",
+				mysql_errno(conn), mysql_error(conn));
+		exit (1);
+	}
+	
+	resultado = mysql_store_result (conn);
+	row = mysql_fetch_row (resultado);
+	if (row == NULL)
+	{
+		printf ("No se han obtenido datos en la consulta\n");
+		sprintf(respuesta, "Error");
+	}
+	
+	else
+	{
+		strcpy(ID, row[0]);
+		sprintf(respuesta, "3-%d", ID);
+	}
+}*/
