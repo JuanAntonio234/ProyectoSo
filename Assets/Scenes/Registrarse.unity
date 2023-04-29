@@ -672,7 +672,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 204575601}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 985281519}
+        m_TargetAssemblyTypeName: 
+        m_MethodName: 
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &204575601
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1778,6 +1790,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: baed5d2d945fba44e901320d23bae592, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  texto: {fileID: 0}
+  NameInput: {fileID: 0}
+  PasswordInput: {fileID: 0}
+  ConfirmPasswordInput: {fileID: 0}
+  IdInput: {fileID: 0}
+  Consulta1: {fileID: 0}
+  Consulta2: {fileID: 0}
+  Consulta3: {fileID: 0}
 --- !u!1 &1037369428
 GameObject:
   m_ObjectHideFlags: 0
@@ -1807,6 +1827,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: baed5d2d945fba44e901320d23bae592, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  texto: {fileID: 0}
+  NameInput: {fileID: 0}
+  PasswordInput: {fileID: 0}
+  ConfirmPasswordInput: {fileID: 0}
+  IdInput: {fileID: 0}
+  Consulta1: {fileID: 0}
+  Consulta2: {fileID: 0}
+  Consulta3: {fileID: 0}
 --- !u!4 &1037369430
 Transform:
   m_ObjectHideFlags: 0

@@ -18,7 +18,7 @@ public class CCliente : MonoBehaviour
 
     private byte[] recibirbuffer = new byte[1024];
     private StringBuilder recibirData = new StringBuilder();
-    ////////////////////////////////////
+    ////////////////////////////////////////////////////////
     public InputField NameInput;
     public InputField PasswordInput;
     public InputField ConfirmPasswordInput;
@@ -27,10 +27,9 @@ public class CCliente : MonoBehaviour
     public Button Consulta1;
     public Button Consulta2;
     public Button Consulta3;
-
-    
     ///////////////////////////////////////////////////////
-    
+
+
     // Start is called before the first frame update
     void Start()
     {
@@ -122,9 +121,9 @@ public class CCliente : MonoBehaviour
     }
 
 
-    private void IniciarSesion()
+    public void IniciarSesion()
     {
-        IPAddress direccion = IPAddress.Parse("127.0.0.1");
+        IPAddress direccion = IPAddress.Parse("192.168.56.102");
         IPEndPoint ip = new IPEndPoint(direccion, 5050);
 
         servidor = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -156,9 +155,9 @@ public class CCliente : MonoBehaviour
 
     }
 
-    private void Registrar()
+    public void Registrar()
     {
-        IPAddress direccion = IPAddress.Parse("127.0.0.1");
+        IPAddress direccion = IPAddress.Parse("192.168.56.102");
         IPEndPoint ip = new IPEndPoint(direccion, 5050);
 
         servidor = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -171,10 +170,16 @@ public class CCliente : MonoBehaviour
             string PasswordConfirm = ConfirmPasswordInput.text;
             string ID = IdInput.text;
 
-
-            string registrar = "1" + "-" + Name + "-" + Password + "-" + ID;
-            byte[] mensaje1 = System.Text.Encoding.ASCII.GetBytes(registrar);
-            servidor.Send(mensaje1);
+            if (Password == PasswordConfirm)
+            {
+                string registrar = "1" + "-" + Name + "-" + Password + "-" + ID;
+                byte[] mensaje1 = System.Text.Encoding.ASCII.GetBytes(registrar);
+                servidor.Send(mensaje1);
+            }
+            else
+            {
+                texto.text = "Las contraseñas no coinciden";
+            }
 
         }
         catch (SocketException e)
