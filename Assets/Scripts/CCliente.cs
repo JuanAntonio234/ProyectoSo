@@ -8,7 +8,8 @@ using MySql.Data.MySqlClient;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Threading;
-
+using UnityEngine.SceneManagement;
+using System.Collections.Generic;
 
 public class CCliente : MonoBehaviour
 {
@@ -27,9 +28,18 @@ public class CCliente : MonoBehaviour
     public Button Consulta1;
     public Button Consulta2;
     public Button Consulta3;
+<<<<<<< HEAD
+
+    public Dropdown dropdown;
+
+
+    ///////////////////////////////////////////////////////
+
+=======
     ///////////////////////////////////////////////////////
 
 
+>>>>>>> 840cc2bb30820823e0f849b8d708067e5c796d36
     // Start is called before the first frame update
     void Start()
     {
@@ -37,12 +47,12 @@ public class CCliente : MonoBehaviour
     }
     private void AtenderServidor()
     {
-        while(true)
+        while (true)
         {
-            byte[]msg= new byte[1024];
+            byte[] msg = new byte[1024];
             servidor.Receive(msg);
-            string [] trozos=Encoding.ASCII.GetString(msg).Split('-');
-            int codigo= Convert.ToInt32(trozos[0]);
+            string[] trozos = Encoding.ASCII.GetString(msg).Split('-');
+            int codigo = Convert.ToInt32(trozos[0]);
             string mensaje = Encoding.ASCII.GetString(msg).Split('\0')[0];
 
             switch (codigo)
@@ -53,14 +63,14 @@ public class CCliente : MonoBehaviour
                         texto.text = "Se ha accedido correctamente a la cuenta";
                         Debug.Log("Se ha accedido correctamente a la cuenta");
                     }
-                    else if(mensaje == "Error")
+                    else if (mensaje == "Error")
                     {
                         texto.text = "Error";
                         Debug.Log("Usuario o contraseña incorrecta");
                     }
                     break;
                 case 1:
-                    if(mensaje == "1-0")
+                    if (mensaje == "1-0")
                     {
                         texto.text = "Registrado correctamente";
                         Debug.Log("Registrado Correctamente");
@@ -73,12 +83,12 @@ public class CCliente : MonoBehaviour
                     }
                     break;
                 case 2:
-                    if(mensaje == "2")
+                    if (mensaje == "2")
                     {
-                        string tiempoJugado= mensaje.Split('-')[1];
+                        string tiempoJugado = mensaje.Split('-')[1];
                         string partidasTotales = mensaje.Split('-')[1];
 
-                        texto.text = "El tiempo medio jugado es: "+tiempoJugado+" y las partidas totales de Pere son: " + partidasTotales;
+                        texto.text = "El tiempo medio jugado es: " + tiempoJugado + " y las partidas totales de Pere son: " + partidasTotales;
                     }
                     else if (mensaje == "Error")
                     {
@@ -89,7 +99,7 @@ public class CCliente : MonoBehaviour
                 case 3:
                     if (mensaje == "3")
                     {
-                        string jugador= mensaje.Split("-")[1];
+                        string jugador = mensaje.Split("-")[1];
                         texto.text = "El nombre del jugador con una duración mayor que tres es " + jugador;
                     }
                     else if (mensaje == "Error")
@@ -111,16 +121,34 @@ public class CCliente : MonoBehaviour
                         Debug.Log("No se encuentran datos que coincidan");
                     }
                     break;
-                 case -1:
+                case 5:
+                    int numeroConectados = int.Parse(trozos[1]);
+                    List<string> jugadoresConectados = GetConnectedPlayersList(mensaje);
+
+                    dropdown.ClearOption();
+                    List<string> jugadoresConectados = GetConnectedPlayersList(mensajeJugadoresConectados);
+
+                    List<Dropdown.OptionData> opciones = new List<Dropdown.OptionData>();
+
+                    foreach (string jugador in jugadoresConectados)
+                    {
+                        opciones.Add(new Dropdown.OptionData(jugador));
+                    }
+                    dropdown.AddOptions(opciones));
+                    break;
+                case -1:
                     servidor.Shutdown(SocketShutdown.Both);
                     texto.text = "Desconectandose del servidor";
                     Debug.Log("Desconectandose del servidor");
-                    break; 
+                    break;
             }
         }
     }
 
+<<<<<<< HEAD
+=======
 
+>>>>>>> 840cc2bb30820823e0f849b8d708067e5c796d36
     public void IniciarSesion()
     {
         IPAddress direccion = IPAddress.Parse("192.168.56.102");
@@ -142,7 +170,7 @@ public class CCliente : MonoBehaviour
             servidor.Send(mensaje1);
 
             ThreadStart t = delegate { AtenderServidor(); };
-            atender=new Thread(t);
+            atender = new Thread(t);
             atender.Start();
 
         }
@@ -157,7 +185,11 @@ public class CCliente : MonoBehaviour
 
     public void Registrar()
     {
+<<<<<<< HEAD
+        IPAddress direccion = IPAddress.Parse("10.0.3.15");
+=======
         IPAddress direccion = IPAddress.Parse("192.168.56.102");
+>>>>>>> 840cc2bb30820823e0f849b8d708067e5c796d36
         IPEndPoint ip = new IPEndPoint(direccion, 5050);
 
         servidor = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -170,6 +202,13 @@ public class CCliente : MonoBehaviour
             string PasswordConfirm = ConfirmPasswordInput.text;
             string ID = IdInput.text;
 
+<<<<<<< HEAD
+
+            string registrar = "1" + "-" + Name + "-" + Password + "-" + ID;
+            byte[] mensaje1 = System.Text.Encoding.ASCII.GetBytes(registrar);
+            servidor.Send(mensaje1);
+            SceneManager.LoadScene("MenuJuego");
+=======
             if (Password == PasswordConfirm)
             {
                 string registrar = "1" + "-" + Name + "-" + Password + "-" + ID;
@@ -180,11 +219,12 @@ public class CCliente : MonoBehaviour
             {
                 texto.text = "Las contraseñas no coinciden";
             }
+>>>>>>> 840cc2bb30820823e0f849b8d708067e5c796d36
 
         }
         catch (SocketException e)
         {
-            texto.text = "no se ha podido conectar con el servidor:";
+            //texto.text = "no se ha podido conectar con el servidor:";
             Debug.Log("no se ha podido conectar con el servidor:" + e);
             return;
         }
@@ -192,7 +232,7 @@ public class CCliente : MonoBehaviour
     ///////////////////////////////////////////////////////////////
 
     // Realizar consulta 1
-    private void Query1()
+    public void Query1()
     {
         try
         {
@@ -206,9 +246,9 @@ public class CCliente : MonoBehaviour
             return;
         }
     }
-    
+
     // Realizar consulta 2
-    private void Query2()
+    public void Query2()
     {
         try
         {
@@ -223,7 +263,7 @@ public class CCliente : MonoBehaviour
         }
     }
     // Realizar consulta 3
-    private void Query3()
+    public void Query3()
     {
         try
         {
@@ -236,5 +276,22 @@ public class CCliente : MonoBehaviour
             Debug.Log("No se ha podido conectar con el servidor: " + ex);
             return;
         }
+    }
+
+    public List<string> GetConnectedPlayersList(string stringJugador)
+    {
+        List<string> jugadoresConectados = new List<string>();
+        string[] ArrayJugadores = stringJugador.Split('-');
+        int numeroConectados = int.Parse(ArrayJugadores[1]);
+
+        for (int i = 0; i < numeroConectados; i++)
+        {
+            string Jugador = ArrayJugadores[i + 2];
+            string []informacionJugador = Jugador.Split('|');
+            string nombreJugador = informacionJugador[0];
+            string estadoJugador = informacionJugador[1];
+            jugadoresConectados.Add(nombreJugador);
+        }
+        return jugadoresConectados;
     }
 }
