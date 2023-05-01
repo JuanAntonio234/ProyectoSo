@@ -22,7 +22,7 @@ public class Cliente : MonoBehaviour
     public void Conectarse()
      {
         IPAddress direccion = IPAddress.Parse("127.0.0.1");
-        IPEndPoint ip = new IPEndPoint(direccion, 9050);
+        IPEndPoint ip = new IPEndPoint(direccion, 5050);
 
         //Creamos el socket 
        

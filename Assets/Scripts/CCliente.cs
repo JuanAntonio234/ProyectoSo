@@ -10,6 +10,7 @@ using UnityEngine.EventSystems;
 using System.Threading;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
+using TMPro;
 
 public class CCliente : MonoBehaviour
 {
@@ -20,26 +21,19 @@ public class CCliente : MonoBehaviour
     private byte[] recibirbuffer = new byte[1024];
     private StringBuilder recibirData = new StringBuilder();
     ////////////////////////////////////////////////////////
-    public InputField NameInput;
-    public InputField PasswordInput;
-    public InputField ConfirmPasswordInput;
-    public InputField IdInput;
+    public TMP_InputField NameInput;
+    public TMP_InputField PasswordInput;
+    public TMP_InputField ConfirmPasswordInput;
+    public TMP_InputField IdInput;
 
     public Button Consulta1;
     public Button Consulta2;
     public Button Consulta3;
-<<<<<<< HEAD
 
-    public Dropdown dropdown;
-
+    public TMP_Dropdown dropdown;
 
     ///////////////////////////////////////////////////////
 
-=======
-    ///////////////////////////////////////////////////////
-
-
->>>>>>> 840cc2bb30820823e0f849b8d708067e5c796d36
     // Start is called before the first frame update
     void Start()
     {
@@ -125,16 +119,15 @@ public class CCliente : MonoBehaviour
                     int numeroConectados = int.Parse(trozos[1]);
                     List<string> jugadoresConectados = GetConnectedPlayersList(mensaje);
 
-                    dropdown.ClearOption();
-                    List<string> jugadoresConectados = GetConnectedPlayersList(mensajeJugadoresConectados);
+                    dropdown.ClearOptions();
 
-                    List<Dropdown.OptionData> opciones = new List<Dropdown.OptionData>();
+                    List<TMP_Dropdown.OptionData> opciones = new List<TMP_Dropdown.OptionData>();
 
                     foreach (string jugador in jugadoresConectados)
                     {
-                        opciones.Add(new Dropdown.OptionData(jugador));
+                        opciones.Add(new TMP_Dropdown.OptionData(jugador));
                     }
-                    dropdown.AddOptions(opciones));
+                    dropdown.AddOptions(opciones);
                     break;
                 case -1:
                     servidor.Shutdown(SocketShutdown.Both);
@@ -144,11 +137,6 @@ public class CCliente : MonoBehaviour
             }
         }
     }
-
-<<<<<<< HEAD
-=======
-
->>>>>>> 840cc2bb30820823e0f849b8d708067e5c796d36
     public void IniciarSesion()
     {
         IPAddress direccion = IPAddress.Parse("192.168.56.102");
@@ -180,17 +168,34 @@ public class CCliente : MonoBehaviour
             Debug.Log("no se ha podido conectar con el servidor:" + e);
             return;
         }
+    }
+    public void Conectarse()
+    {
+        servidor = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
+        IPAddress direccion = IPAddress.Parse("127.0.0.1");
+        IPEndPoint ip = new IPEndPoint(direccion, 5060);
+
+        //Creamos el socket 
+
+        try
+        {
+            servidor.Connect(ip);
+            Debug.Log("conectado");
+        }
+        catch (SocketException ex)
+        {
+            Debug.Log("No se ha podido conectar con el servidor: " + ex.Message);
+
+            return;
+        }
     }
 
-    public void Registrar()
+
+        public void Registrar()
     {
-<<<<<<< HEAD
-        IPAddress direccion = IPAddress.Parse("10.0.3.15");
-=======
         IPAddress direccion = IPAddress.Parse("192.168.56.102");
->>>>>>> 840cc2bb30820823e0f849b8d708067e5c796d36
-        IPEndPoint ip = new IPEndPoint(direccion, 5050);
+        IPEndPoint ip = new IPEndPoint(direccion, 5060);
 
         servidor = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
@@ -202,30 +207,22 @@ public class CCliente : MonoBehaviour
             string PasswordConfirm = ConfirmPasswordInput.text;
             string ID = IdInput.text;
 
-<<<<<<< HEAD
-
-            string registrar = "1" + "-" + Name + "-" + Password + "-" + ID;
-            byte[] mensaje1 = System.Text.Encoding.ASCII.GetBytes(registrar);
-            servidor.Send(mensaje1);
-            SceneManager.LoadScene("MenuJuego");
-=======
             if (Password == PasswordConfirm)
             {
                 string registrar = "1" + "-" + Name + "-" + Password + "-" + ID;
                 byte[] mensaje1 = System.Text.Encoding.ASCII.GetBytes(registrar);
                 servidor.Send(mensaje1);
+                SceneManager.LoadScene("MenuJuego");
             }
             else
             {
                 texto.text = "Las contraseñas no coinciden";
             }
->>>>>>> 840cc2bb30820823e0f849b8d708067e5c796d36
-
         }
         catch (SocketException e)
         {
-            //texto.text = "no se ha podido conectar con el servidor:";
-            Debug.Log("no se ha podido conectar con el servidor:" + e);
+            Debug.Log("no se ha podido conectar con el servidor:" + e.Message);
+            texto.text = "no se ha podido conectar con el servidor:";
             return;
         }
     }
