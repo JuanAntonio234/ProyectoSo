@@ -163,7 +163,7 @@ void *atenderCliente(void *socket)
 			write(listaPArtidas.partidas[i].socket[0],respuesta, strlen(respuesta));
 			pthread_mutex_unlock(&mutex);
 			else {
-				strcpy(respuesta, "6 - Aceptado");
+				strcpy(respuesta, "6 - Denegar");
 				write(listaPArtidas.partidas[i].socket[0], respuesta, strlen(respuesta));
 			}
 		}
