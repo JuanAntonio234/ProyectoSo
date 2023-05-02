@@ -23,7 +23,21 @@ typedef struct {
 
 ListaConectados lista;
 
+typedf struct {
+	char jugador[4][25];
+	int socket;
+	int ocupado;
+}Partida;
+typedef struct {
+	Partida partida[20];
+
+	int num;
+}listaPArtidas;
+
 int sockets[100];
+void PARTIDAS(listaPArtidas listaPart) {
+	listaPart->partida[n].ocupado = 0;
+}
 
 void *atenderCliente(void *socket)
 {
@@ -42,31 +56,31 @@ void *atenderCliente(void *socket)
 	int conexion = 0;
 	int r;
 	int i;
-	
-	while(conexion == 0)
+
+	while (conexion == 0)
 	{
-		ret=read(sock_conn,peticion, sizeof(peticion));
-		printf ("Recibido\n");
-		peticion[ret]='\0';
+		ret = read(sock_conn, peticion, sizeof(peticion));
+		printf("Recibido\n");
+		peticion[ret] = '\0';
 		int error = 1;
 		int codigo = 9999;
-		char *p;
-		
-		if(strlen(peticion) < 2){
+		char* p;
+
+		if (strlen(peticion) < 2) {
 			error = 0;
 		}
-		
-		if (strcmp(peticion, "") != 0){
-			printf ("Peticion: %s\n",peticion);
+
+		if (strcmp(peticion, "") != 0) {
+			printf("Peticion: %s\n", peticion);
 			p = strtok(peticion, "-");
 			codigo = atoi(p);
-		}	
-		
-		if (error == 0){
+		}
+
+		if (error == 0) {
 			codigo = 9999;
 		}
-		
-		if(codigo == 0) //LOGIN
+
+		if (codigo == 0) //LOGIN
 		{
 			pthread_mutex_lock(&mutex);
 			p = strtok(NULL, "-");
@@ -76,15 +90,15 @@ void *atenderCliente(void *socket)
 			strcpy(contrasena, p);
 			printf("Codigo: %d, Nombre: %s y Contrase￱a: %s\n", codigo, nombre, contrasena);
 			Login(nombre, contrasena, contestacion);
-			if(strcmp (contestacion, "Error") != 0)
+			if (strcmp(contestacion, "Error") != 0)
 				r = Conectar(&lista, nombre, socket);
 			DameConectados(&lista, conectados);
 			sprintf(respuesta, "%s", contestacion);
-			write (sock_conn,respuesta,strlen(respuesta));
+			write(sock_conn, respuesta, strlen(respuesta));
 			pthread_mutex_unlock(&mutex);
 		}
-		
-		else if(codigo == 4) //REGISTRAR
+
+		else if (codigo == 1) //REGISTRAR
 		{
 			pthread_mutex_lock(&mutex);
 			p = strtok(NULL, "-");
@@ -93,15 +107,15 @@ void *atenderCliente(void *socket)
 			strcpy(contrasena, p);
 			printf("Codigo: %d, Fecha: %s y Nombre: %s\n", codigo, contrasena, nombre);
 			Registrar(nombre, contrasena, contestacion);
-			if(strcmp (contestacion, "Error") != 0)
+			if (strcmp(contestacion, "Error") != 0)
 				r = Conectar(&lista, nombre, socket);
 			DameConectados(&lista, conectados);
 			sprintf(respuesta, "%s", contestacion);
-			write (sock_conn,respuesta,strlen(respuesta));
+			write(sock_conn, respuesta, strlen(respuesta));
 			pthread_mutex_unlock(&mutex);
 		}
-		
-		else if(codigo == 5) //DESCONECTAR
+
+		else if (codigo == -1) //DESCONECTAR
 		{
 			pthread_mutex_lock(&mutex);
 			p = strtok(NULL, "-");
@@ -114,8 +128,8 @@ void *atenderCliente(void *socket)
 			close(sock_conn);
 			pthread_mutex_unlock(&mutex);
 		}
-		
-		else if(codigo == 1)
+
+		else if (codigo == 3)
 		{
 			pthread_mutex_lock(&mutex);
 			p = strtok(NULL, "-");
@@ -123,22 +137,38 @@ void *atenderCliente(void *socket)
 			printf("Codigo: %d, Fecha: %s\n", codigo, fecha);
 			NombreJugadorDuracionMayor3(contestacion);
 			sprintf(respuesta, "%s", contestacion);
-			write (sock_conn,respuesta,strlen(respuesta));
+			write(sock_conn, respuesta, strlen(respuesta));
 			pthread_mutex_unlock(&mutex);
 		}
-		
-		else if(codigo == 2)
+
+		else if (codigo == 2)
 		{
 			pthread_mutex_lock(&mutex);
 			p = strtok(NULL, "-");
-			strcpy(fecha, p);		
+			strcpy(fecha, p);
 			printf("Codigo: %d, Fecha: %s\n", codigo, fecha);
 			JugadoresJugadoMismoDiaPere(contestacion);
 			sprintf(respuesta, "%s", contestacion);
-			write (sock_conn,respuesta,strlen(respuesta));
+			write(sock_conn, respuesta, strlen(respuesta));
 			pthread_mutex_unlock(&mutex);
 		}
-		
+		/////////////////////////////////////////
+		else if (codigo == 6) {
+			int i;
+			p = strtok(NULL, "-");
+			if(strcmp(p, "ACEPTAR") == 0){
+			sprintf(respuesta, "6-%s-ACEPTADO", nombre);
+
+	
+			write(listaPArtidas.partidas[i].socket[0],respuesta, strlen(respuesta));
+			pthread_mutex_unlock(&mutex);
+			else {
+				strcpy(respuesta, "6 - Aceptado");
+				write(listaPArtidas.partidas[i].socket[0], respuesta, strlen(respuesta));
+			}
+		}
+		//////////////////////////////////////////////
+
 		/*else if(codigo == 3)
 		{
 			pthread_mutex_lock(&mutex);

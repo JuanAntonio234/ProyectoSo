@@ -2,11 +2,8 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using Unity.VisualScripting;
 using UnityEngine;
-using MySql.Data.MySqlClient;
 using UnityEngine.UI;
-using UnityEngine.EventSystems;
 using System.Threading;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
@@ -32,13 +29,10 @@ public class CCliente : MonoBehaviour
 
     public TMP_Dropdown dropdown;
 
+    public Grid jugadoresGrid;
+
+
     ///////////////////////////////////////////////////////
-
-    // Start is called before the first frame update
-    void Start()
-    {
-
-    }
     private void AtenderServidor()
     {
         while (true)
@@ -118,16 +112,31 @@ public class CCliente : MonoBehaviour
                 case 5:
                     int numeroConectados = int.Parse(trozos[1]);
                     List<string> jugadoresConectados = GetConnectedPlayersList(mensaje);
-
-                    dropdown.ClearOptions();
-
-                    List<TMP_Dropdown.OptionData> opciones = new List<TMP_Dropdown.OptionData>();
-
-                    foreach (string jugador in jugadoresConectados)
+                    
+                    for(int i = 0; i < numeroConectados; i++)
                     {
-                        opciones.Add(new TMP_Dropdown.OptionData(jugador));
+                        foreach (string jugador in jugadoresConectados)
+                        {
+                            texto.text=jugador;
+                        }
                     }
-                    dropdown.AddOptions(opciones);
+                    ///creo que mejor poner text y asignar uno a uno//////////////////////////////////////////
+                    ////////////////////////////////////////////
+                    ////////////////////////////////////////
+                    //////////////////////////////////////////
+                    ///////////////////////////////////
+                    ///
+
+
+                    break;
+                case 6:
+                    if (mensaje != "6-ERROR")
+                    {
+                        Convert.ToString(mensaje);
+                        string Partida = mensaje.Split('-')[1];
+                        string invitacion = mensaje.Split('-')[2];
+                        texto.text = "El jugador te ha invitado a jugar";
+                    }
                     break;
                 case -1:
                     servidor.Shutdown(SocketShutdown.Both);
@@ -169,6 +178,7 @@ public class CCliente : MonoBehaviour
             return;
         }
     }
+    ////////////////////////////////////
     public void Conectarse()
     {
         servidor = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -190,8 +200,7 @@ public class CCliente : MonoBehaviour
             return;
         }
     }
-
-
+    /////////////////////////////////////////
         public void Registrar()
     {
         IPAddress direccion = IPAddress.Parse("192.168.56.102");
