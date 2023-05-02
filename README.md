@@ -6,4 +6,4 @@ Versión 2 generado por Pere Versión 1 verificado por Juan Versión 1 comunicad
 
 Versión 3 generado por Oriol, verificado por Pere, comunicado por Juan, URL del video: https://youtu.be/tO5E2lL-U1Y
 
-Versión 4 generado por Juan Versión 1 verificado por Pere Versión 1 comunicado por Oriol URL del video: 
+Versión 4 generado por Juan Versión 1 verificado por Pere Versión 1 comunicado por Oriol URL del video: https://youtu.be/g5JdXhtXpts
