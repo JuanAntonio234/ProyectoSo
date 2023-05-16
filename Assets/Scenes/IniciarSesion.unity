@@ -1396,13 +1396,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   texto: {fileID: 0}
-  NameInput: {fileID: 0}
-  PasswordInput: {fileID: 0}
+  NameInput: {fileID: 2118989403}
+  PasswordInput: {fileID: 596674132}
   ConfirmPasswordInput: {fileID: 0}
   IdInput: {fileID: 0}
   Consulta1: {fileID: 0}
   Consulta2: {fileID: 0}
   Consulta3: {fileID: 0}
+  dropdown: {fileID: 0}
+  jugadoresGrid: {fileID: 0}
 --- !u!1 &1490104494
 GameObject:
   m_ObjectHideFlags: 0

@@ -11,9 +11,12 @@ using TMPro;
 
 public class CCliente : MonoBehaviour
 {
-    public Text texto;
+    public TMP_Text texto;
+    public TextMeshProUGUI texto1;
     Socket servidor;
     Thread atender;
+
+    int puerto=5052;
 
     private byte[] recibirbuffer = new byte[1024];
     private StringBuilder recibirData = new StringBuilder();
@@ -27,7 +30,6 @@ public class CCliente : MonoBehaviour
     public Button Consulta2;
     public Button Consulta3;
 
-    public TMP_Dropdown dropdown;
 
     public Grid jugadoresGrid;
 
@@ -70,7 +72,7 @@ public class CCliente : MonoBehaviour
                         Debug.Log("Problema al crear al usuario");
                     }
                     break;
-                case 2:
+               case 2:
                     if (mensaje == "2")
                     {
                         string tiempoJugado = mensaje.Split('-')[1];
@@ -122,12 +124,10 @@ public class CCliente : MonoBehaviour
                     }
                     ///creo que mejor poner text y asignar uno a uno//////////////////////////////////////////
                     ////////////////////////////////////////////
-                    ////////////////////////////////////////
+                    ///////////////////////////////////////////
+                    ///////////////////////////////////////////
                     //////////////////////////////////////////
-                    ///////////////////////////////////
-                    ///
-
-
+                    
                     break;
                 case 6:
                     if (mensaje != "6-ERROR")
@@ -149,7 +149,7 @@ public class CCliente : MonoBehaviour
     public void IniciarSesion()
     {
         IPAddress direccion = IPAddress.Parse("192.168.56.102");
-        IPEndPoint ip = new IPEndPoint(direccion, 5050);
+        IPEndPoint ip = new IPEndPoint(direccion, puerto);
 
         servidor = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
@@ -161,15 +161,13 @@ public class CCliente : MonoBehaviour
             string PasswordConfirm = ConfirmPasswordInput.text;
             string ID = IdInput.text;
 
-
-            string iniciarSesion = "0" + "-" + Name + "-" + Password;
+            string iniciarSesion = "0" + "/" + Name + "-" + Password;
             byte[] mensaje1 = System.Text.Encoding.ASCII.GetBytes(iniciarSesion);
             servidor.Send(mensaje1);
 
             ThreadStart t = delegate { AtenderServidor(); };
             atender = new Thread(t);
             atender.Start();
-
         }
         catch (SocketException e)
         {
@@ -183,14 +181,15 @@ public class CCliente : MonoBehaviour
     {
         servidor = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-        IPAddress direccion = IPAddress.Parse("127.0.0.1");
-        IPEndPoint ip = new IPEndPoint(direccion, 5060);
+        IPAddress direccion = IPAddress.Parse("192.168.56.102");
+        IPEndPoint ip = new IPEndPoint(direccion, puerto);
 
         //Creamos el socket 
 
         try
         {
             servidor.Connect(ip);
+            texto.text = "conectado correctamente";
             Debug.Log("conectado");
         }
         catch (SocketException ex)
@@ -204,7 +203,7 @@ public class CCliente : MonoBehaviour
         public void Registrar()
     {
         IPAddress direccion = IPAddress.Parse("192.168.56.102");
-        IPEndPoint ip = new IPEndPoint(direccion, 5060);
+        IPEndPoint ip = new IPEndPoint(direccion, puerto);
 
         servidor = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
@@ -215,23 +214,23 @@ public class CCliente : MonoBehaviour
             string Password = PasswordInput.text;
             string PasswordConfirm = ConfirmPasswordInput.text;
             string ID = IdInput.text;
-
+            
             if (Password == PasswordConfirm)
             {
-                string registrar = "1" + "-" + Name + "-" + Password + "-" + ID;
+                string registrar = "1" + "/" + Name + "-" + Password + "-" + ID;
                 byte[] mensaje1 = System.Text.Encoding.ASCII.GetBytes(registrar);
                 servidor.Send(mensaje1);
                 SceneManager.LoadScene("MenuJuego");
             }
-            else
+            else if (PasswordInput.text != ConfirmPasswordInput.text)
             {
-                texto.text = "Las contraseñas no coinciden";
+                texto1.text = "Las contraseñas no coinciden";
             }
         }
         catch (SocketException e)
         {
-            Debug.Log("no se ha podido conectar con el servidor:" + e.Message);
             texto.text = "no se ha podido conectar con el servidor:";
+            Debug.Log("no se ha podido conectar con el servidor:" + e.Message);
             return;
         }
     }
