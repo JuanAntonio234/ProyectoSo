@@ -8,4 +8,4 @@ Versión 3 generado por Oriol, verificado por Pere, comunicado por Juan, URL del
 
 Versión 4 generado por Juan , verificado por Pere , comunicado por Oriol URL del video: https://youtu.be/g5JdXhtXpts
 
-Versión 5 generado por Oriol, verificado por Juna, comunicado por Pere URL del vídeo: https://www.youtube.com/watch?v=76vV2ykgF-c
+Versión 5 generado por Oriol, verificado por Juan, comunicado por Pere URL del vídeo: https://www.youtube.com/watch?v=76vV2ykgF-c
