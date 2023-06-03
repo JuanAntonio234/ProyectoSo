@@ -8,10 +8,10 @@ using System.Threading;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 using TMPro;
+
 public class UnityMainThreadDispatcher : MonoBehaviour
 {
     private static UnityMainThreadDispatcher instance;
-
     private readonly Queue<Action> actionQueue = new Queue<Action>();
 
     private void Update()
@@ -49,18 +49,18 @@ public class UnityMainThreadDispatcher : MonoBehaviour
         return instance;
     }
 }
+
 public class CCliente : MonoBehaviour
 {
     public TMP_Text texto;
-    public TextMeshProUGUI texto1;
     Socket servidor;
     Thread atender;
 
-    int puerto=5052;
+    int puerto=5061;
 
     private byte[] recibirbuffer = new byte[1024];
     private StringBuilder recibirData = new StringBuilder();
-    ////////////////////////////////////////////////////////
+
     public TMP_InputField NameInput;
     public TMP_InputField PasswordInput;
     public TMP_InputField ConfirmPasswordInput;
@@ -70,11 +70,6 @@ public class CCliente : MonoBehaviour
     public Button Consulta2;
     public Button Consulta3;
 
-
-    public Grid jugadoresGrid;
-
-
-    ///////////////////////////////////////////////////////
     private void AtenderServidor()
     {
         while (true)
@@ -225,6 +220,35 @@ public class CCliente : MonoBehaviour
             }
         }
     }
+     public void Conectarse()
+    {
+        servidor = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
+        IPAddress direccion = IPAddress.Parse("192.168.56.102");
+        IPEndPoint ip = new IPEndPoint(direccion, puerto);
+
+        //Creamos el socket 
+
+        try
+        {
+            servidor.Connect(ip);
+            UnityMainThreadDispatcher.Instance().Enqueue(() =>
+            {
+                texto.text = "Conectado correctamente";
+                Debug.Log("Conectado");
+            });
+        }
+        catch (SocketException ex)
+        {
+            UnityMainThreadDispatcher.Instance().Enqueue(() =>
+            {
+                texto.text = "no se ha podido conectar con el servidor:";
+                Debug.Log("no se ha podido conectar con el servidor:" + ex);
+            });
+
+            return;
+        }
+    }
     public void IniciarSesion()
     {
         IPAddress direccion = IPAddress.Parse("192.168.56.102");
@@ -258,38 +282,8 @@ public class CCliente : MonoBehaviour
             return;
         }
     }
-    ////////////////////////////////////
-    public void Conectarse()
-    {
-        servidor = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-        IPAddress direccion = IPAddress.Parse("192.168.56.102");
-        IPEndPoint ip = new IPEndPoint(direccion, puerto);
-
-        //Creamos el socket 
-
-        try
-        {
-            servidor.Connect(ip);
-            UnityMainThreadDispatcher.Instance().Enqueue(() =>
-            {
-                texto.text = "Conectado correctamente";
-                Debug.Log("Conectado");
-            });
-        }
-        catch (SocketException ex)
-        {
-            UnityMainThreadDispatcher.Instance().Enqueue(() =>
-            {
-                texto.text = "Conectado correctamente";
-                Debug.Log("Conectado");
-            });
-
-            return;
-        }
-    }
-    /////////////////////////////////////////
-        public void Registrar()
+    public void Registrar()
     {
         IPAddress direccion = IPAddress.Parse("192.168.56.102");
         IPEndPoint ip = new IPEndPoint(direccion, puerto);
@@ -306,7 +300,7 @@ public class CCliente : MonoBehaviour
             
             if (Password == PasswordConfirm)
             {
-                string registrar = "1" + "/" + Name + "-" + Password + "-" + ID;
+                string registrar = "1" + "-" +ID + "-" + Name + "-" + Password;
                 byte[] mensaje1 = System.Text.Encoding.ASCII.GetBytes(registrar);
                 servidor.Send(mensaje1);
                 UnityMainThreadDispatcher.Instance().Enqueue(() =>
