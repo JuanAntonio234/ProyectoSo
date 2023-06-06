@@ -8,6 +8,7 @@ using System.Threading;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 using TMPro;
+using UnityEditor.VersionControl;
 
 public class UnityMainThreadDispatcher : MonoBehaviour
 {
@@ -53,10 +54,11 @@ public class UnityMainThreadDispatcher : MonoBehaviour
 public class CCliente : MonoBehaviour
 {
     public TMP_Text texto;
+
     Socket servidor;
     Thread atender;
 
-    int puerto=5061;
+    int puerto=5062;
 
     private byte[] recibirbuffer = new byte[1024];
     private StringBuilder recibirData = new StringBuilder();
@@ -70,6 +72,19 @@ public class CCliente : MonoBehaviour
     public Button Consulta2;
     public Button Consulta3;
 
+    private GameObject prefabJugador; // Asigna el prefab del jugador 
+    private GameObject jugadorLocal;
+
+    private string nombreJugador;
+
+    private void Start()
+    {
+        IPAddress direccion = IPAddress.Parse("192.168.56.102");
+        IPEndPoint ip = new IPEndPoint(direccion, puerto);
+
+        servidor = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        servidor.Connect(ip);
+    }
     private void AtenderServidor()
     {
         while (true)
@@ -220,7 +235,7 @@ public class CCliente : MonoBehaviour
             }
         }
     }
-     public void Conectarse()
+   /*  public void Conectarse()
     {
         servidor = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
@@ -248,17 +263,11 @@ public class CCliente : MonoBehaviour
 
             return;
         }
-    }
+    }*/
     public void IniciarSesion()
     {
-        IPAddress direccion = IPAddress.Parse("192.168.56.102");
-        IPEndPoint ip = new IPEndPoint(direccion, puerto);
-
-        servidor = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
         try
-        {
-            servidor.Connect(ip);
+        { 
             string Name = NameInput.text;
             string Password = PasswordInput.text;
             string PasswordConfirm = ConfirmPasswordInput.text;
@@ -271,6 +280,9 @@ public class CCliente : MonoBehaviour
             ThreadStart t = delegate { AtenderServidor(); };
             atender = new Thread(t);
             atender.Start();
+            // Crea una instancia del prefab del jugador en la posición inicial
+            jugadorLocal = Instantiate(prefabJugador, Vector3.zero, Quaternion.identity);
+
         }
         catch (SocketException e)
         {
@@ -282,17 +294,10 @@ public class CCliente : MonoBehaviour
             return;
         }
     }
-
     public void Registrar()
     {
-        IPAddress direccion = IPAddress.Parse("192.168.56.102");
-        IPEndPoint ip = new IPEndPoint(direccion, puerto);
-
-        servidor = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
         try
         {
-            servidor.Connect(ip);
             string Name = NameInput.text;
             string Password = PasswordInput.text;
             string PasswordConfirm = ConfirmPasswordInput.text;
@@ -307,13 +312,11 @@ public class CCliente : MonoBehaviour
                 {
                     SceneManager.LoadScene("MenuJuego");
                 });
+                jugadorLocal = Instantiate(prefabJugador, Vector3.zero, Quaternion.identity);
             }
             else if (PasswordInput.text != ConfirmPasswordInput.text)
             {
-                UnityMainThreadDispatcher.Instance().Enqueue(() =>
-                {
-                    SceneManager.LoadScene("MenuJuego");
-                });
+                texto.text = "Contraseña incorrecta.";
             }
         }
         catch (SocketException e)
@@ -346,7 +349,6 @@ public class CCliente : MonoBehaviour
             return;
         }
     }
-
     // Realizar consulta 2
     public void Query2()
     {
@@ -384,6 +386,7 @@ public class CCliente : MonoBehaviour
         }
     }
 
+    //la lista la obtengo del servidor
     public List<string> GetConnectedPlayersList(string stringJugador)
     {
         List<string> jugadoresConectados = new List<string>();
@@ -402,5 +405,37 @@ public class CCliente : MonoBehaviour
             }
         });
         return jugadoresConectados;
+    }
+    void ConectarJugador(string nombre)
+    {
+        // Asignar el nombre del jugador al prefab
+        nombreJugador = nombre;
+        ActualizarNombreJugador();
+    }
+    void ActualizarNombreJugador()
+    {
+        // Asignar el nombre del jugador al nombre del prefab
+        prefabJugador.name = nombreJugador;
+    }
+    void ActualizarPosicionJugador(GameObject jugador, Vector3 nuevaPosicion)
+    {
+        byte[] msg = new byte[1024];
+        servidor.Receive(msg);
+
+        string mensaje = Encoding.ASCII.GetString(msg).Split('\0')[0];
+
+        //borrar posteriormente      // El mensaje debe contener la información de posición en un formato específico (por ejemplo: "POSICION:2.5,1.3")
+        string[] partes = mensaje.Split(':');
+        if (partes.Length == 2 && partes[0] == "POSICION")
+        {
+            string[] valores = partes[1].Split(',');
+            if (valores.Length == 2)
+            {
+                float posX = float.Parse(valores[0]);
+                float posY = float.Parse(valores[1]);
+                // Actualiza la posición del jugador local
+                jugadorLocal.transform.position = new Vector3(posX, posY, 0f);
+            }
+        }
     }
 }
