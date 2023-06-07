@@ -1,5 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Net.Sockets;
+using System.Net.WebSockets;
+using System.Text;
 using UnityEngine;
 
 public class MovimientoJugador : MonoBehaviour
@@ -10,10 +13,17 @@ public class MovimientoJugador : MonoBehaviour
     public GameObject balaPrefab;
     private float ultimoDisparo;
 
+    private Vector3 posicionActual;
+    private Socket clienteSocket;
+
     // Start is called before the first frame update
     void Start()
     {
-        rigidbody2=GetComponent<Rigidbody2D>();
+        rigidbody2 = GetComponent<Rigidbody2D>();
+        posicionActual = transform.position;
+
+        // Obtengo la referencia al socket cliente  desde CCliente
+        clienteSocket = CCliente.clienteSocket;
     }
 
     // Update is called once per frame
@@ -24,19 +34,21 @@ public class MovimientoJugador : MonoBehaviour
         //codigo para saltar
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            rigidbody2.AddForce(Vector2.up*fuerzaDeSalto);
+            rigidbody2.AddForce(Vector2.up * fuerzaDeSalto);
         }
-        if(Horizontal <0.0f)transform.localScale= new Vector3 (-1.0f, 1.0f, 1.0f);
-        else if(Horizontal>0.0f)transform.localScale=new Vector3(1.0f, 1.0f, 1.0f);
-        if(Input.GetKey(KeyCode.Q)&& Time.time>ultimoDisparo+0.30f)
+        if (Horizontal < 0.0f) transform.localScale = new Vector3(-1.0f, 1.0f, 1.0f);
+        else if (Horizontal > 0.0f) transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
+        if (Input.GetKey(KeyCode.Q) && Time.time > ultimoDisparo + 0.30f)
         {
             Disparar();
             ultimoDisparo = Time.time;
         }
+        // Llamar a la función para actualizar la posición del jugador
+        ActualizarPosicionJugador();
     }
     private void FixedUpdate()
     {
-          rigidbody2.velocity = new Vector2(Horizontal, rigidbody2.velocity.y);
+        rigidbody2.velocity = new Vector2(Horizontal, rigidbody2.velocity.y);
     }
     private void Disparar()
     {
@@ -44,7 +56,32 @@ public class MovimientoJugador : MonoBehaviour
         if (transform.localScale.x == 1.0f) direccion = Vector2.right;
         else direccion = Vector2.left;
 
-        GameObject bullet = Instantiate(balaPrefab, transform.position+direccion*0.1f, Quaternion.identity);
+        GameObject bullet = Instantiate(balaPrefab, transform.position + direccion * 0.1f, Quaternion.identity);
         bullet.GetComponent<BalaScript>().EstablecerDireccion(direccion);
+    }
+    // Función para actualizar la posición del jugador y enviarla al servidor
+    void ActualizarPosicionJugador()
+    {
+        Vector3 nuevaPosicion = transform.position;
+
+        if (nuevaPosicion != posicionActual)
+        {
+            posicionActual = nuevaPosicion;
+            EnviarPosicion((int)nuevaPosicion.x, (int)nuevaPosicion.y);
+        }
+    }
+    // Función para enviar la posición al servidor
+    void EnviarPosicion(int posX, int posY)
+    {
+        try
+        {
+            string mensaje = "6-" + posX.ToString() + "-" + posY.ToString();
+            byte[] buffer = Encoding.ASCII.GetBytes(mensaje);
+            clienteSocket.Send(buffer);
+        }
+        catch (SocketException ex)
+        {
+            Debug.Log("Error de socket: " + ex.Message);
+        }
     }
 }
