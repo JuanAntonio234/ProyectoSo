@@ -7,9 +7,11 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <mysql.h>
+#include <arpa/inet.h>
 
 //Estructura necessaria para login excluyente
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+#define MAX_CLIENTS 4
 
 typedef struct {
 	char nombre[20];
@@ -20,6 +22,8 @@ typedef struct {
 	Conectado conectados [100];
 	int num;
 } ListaConectados;
+
+
 typedef struct{
 	char jugado[4][15];
 	int socket[5];
@@ -29,166 +33,22 @@ typedef struct{
 	Partida partida[100];
 	int num;
 }listPartidas;
+typedef struct{
+	int clientSocket;
+	float positionX;
+	float positionY;
+} Jugador;
+
+Jugador jugadores[10];
+ListaConectados lista;
+listPartidas listapartidas;
 
 int i=0;
 int sockets[100];
 
-ListaConectados lista;
-listPartidas listapartidas;
-void DameConectados(ListaConectados *lista,char conectados[300]);
-void Login(char nombre[25], char contrasena[25], char respuesta[512]);
-void Registrar(char nombre[25], char contrasena[25], char respuesta[512]);
-void NombreJugadorDuracionMayor3(char respuesta[512]);
-void JugadoresJugadoMismoDiaPere(char respuesta[512]);
-void DameID(char nombre[50], char respuesta[512]);
-void *atenderCliente(void *socket);
-int Desconectar(ListaConectados *lista, char nombre[20]);
 int Conectar(ListaConectados *lista, char nombre[20], int socket);
 
-void *atenderCliente(void *socket)
-{
-	int sock_conn, ret;
-	int *s;
-	s = (int *) socket;
-	sock_conn = *s;
-	
-	char peticion[512];
-	char respuesta[512];
-	char contestacion[512];
-	char contrasena[20];
-	char nombre[25];
-	char fecha[11];
-	char conectados[300];
-	int conexion = 0;
-	int r;
-	int i;
-	
-	while(conexion == 0)
-	{
-		ret=read(sock_conn,peticion, sizeof(peticion));
-		printf ("Recibido\n");
-		peticion[ret]='\0';
-		int error = 1;
-		int codigo = 9999;
-		char *p;
-		
-		if(strlen(peticion) < 2){
-			error = 0;
-		}
-		
-		if (strcmp(peticion, "") != 0){
-			printf ("Peticion: %s\n",peticion);
-			p = strtok(peticion, "-");
-			codigo = atoi(p);
-		}
-		
-		if (error == 0){
-			codigo = 9999;
-		}
-		
-		if(codigo == 0) //LOGIN
-		{
-			pthread_mutex_lock(&mutex);
-			p = strtok(NULL, "-");
-			strcpy(nombre, p);
-			printf("Codigo de conexion: %d\n", r);
-			p = strtok(NULL, "-");
-			strcpy(contrasena, p);
-			printf("Codigo: %d, Nombre: %s y Contrase￱a: %s\n", codigo, nombre, contrasena);
-			Login(nombre, contrasena, contestacion);
-			
-			if(strcmp (contestacion, "Error") != 0)
-				r = Conectar(&lista, nombre, socket);
-			
-			DameConectados(&lista, conectados);
-			sprintf(respuesta, "%s", contestacion);
-			write (sock_conn,respuesta,strlen(respuesta));
-			pthread_mutex_unlock(&mutex);
-		}
-		else if(codigo == 1) //REGISTRAR
-		{
-			pthread_mutex_lock(&mutex);
-			p = strtok(NULL, "/");
-			strcpy(nombre, p);
-			p = strtok(NULL, "-");
-			strcpy(contrasena, p);
-			printf("Codigo: %d, contrasena: %s y Nombre: %s\n", codigo, contrasena, nombre);
-			Registrar(nombre, contrasena, contestacion);
-			if(strcmp (contestacion, "Error") != 0)
-				r = Conectar(&lista, nombre, socket);
-			DameConectados(&lista, conectados);
-			sprintf(respuesta, "%s", contestacion);
-			write (sock_conn,respuesta,strlen(respuesta));
-			pthread_mutex_unlock(&mutex);
-		}
-		else if(codigo == 2)
-		{
-			pthread_mutex_lock(&mutex);
-			p = strtok(NULL, "-");
-			strcpy(fecha, p);
-			printf("Codigo: %d, Fecha: %s\n", codigo, fecha);
-			JugadoresJugadoMismoDiaPere(contestacion);
-			sprintf(respuesta, "%s", contestacion);
-			write (sock_conn,respuesta,strlen(respuesta));
-			pthread_mutex_unlock(&mutex);
-		}
-		else if(codigo == 3)
-		{
-			pthread_mutex_lock(&mutex);
-			p = strtok(NULL, "-");
-			strcpy(fecha, p);
-			printf("Codigo: %d, Fecha: %s\n", codigo, fecha);
-			NombreJugadorDuracionMayor3(contestacion);
-			sprintf(respuesta, "%s", contestacion);
-			write (sock_conn,respuesta,strlen(respuesta));
-			pthread_mutex_unlock(&mutex);
-		}
-		/*else if(codigo == 3)
-		{
-		pthread_mutex_lock(&mutex);
-		p = strtok(NULL, "-");
-		strcpy(fecha, p);
-		printf("Codigo: %d, Fecha: %s\n", codigo, fecha);
-		DameID(nombre, contestacion);
-		sprintf(respuesta, "%s", contestacion);
-		write (sock_conn,respuesta,strlen(respuesta));
-		pthread_mutex_unlock(&mutex);
-		}*/
-		
-		else if(codigo == 5) //DESCONECTAR
-		{
-			pthread_mutex_lock(&mutex);
-			p = strtok(NULL, "-");
-			strcpy(nombre, p);
-			conexion = 1;
-			printf("Desconectando a %s\n", nombre);
-			r = Desconectar(&lista, nombre);
-			printf("Codigo de desconexion: %d\n", r);
-			DameConectados(&lista, conectados);
-			close(sock_conn);
-			pthread_mutex_unlock(&mutex);
-		}
-		
-		else if (codigo == 1 || codigo == 4 || codigo == 5)
-		{
-			pthread_mutex_lock(&mutex);
-			int j;
-			DameConectados(&lista, conectados);
-			sprintf(respuesta, "6-%s", conectados);
-			printf("%s\n", respuesta);
-			pthread_mutex_unlock(&mutex);
-			for (j = 0; j < lista.num; j++)
-			{
-				write (sockets[j],respuesta,strlen(respuesta));
-			}
-		}
-		else{
-			printf("Peticion no existe\n");
-		}
-	}
-}
-
-void DameConectados(ListaConectados * lista, char conectados[300])
+void DameConectados(ListaConectados *lista, char conectados[300])
 {
 	int i;
 	sprintf (conectados, "%d", lista->num);
@@ -198,7 +58,7 @@ void DameConectados(ListaConectados * lista, char conectados[300])
 	}
 }
 
-int DamePos(ListaConectados * lista, char nombre[20])
+int DamePos(ListaConectados *lista, char nombre[20])
 {
 	int i = 0;
 	int encontrado = 0;
@@ -216,7 +76,7 @@ int DamePos(ListaConectados * lista, char nombre[20])
 		return -1;
 }
 
-int Desconectar(ListaConectados * lista, char nombre[20])
+int Desconectar(ListaConectados *lista, char nombre[20])
 {
 	int pos = DamePos(lista, nombre);
 	if (pos == -1)
@@ -248,6 +108,13 @@ int Conectar(ListaConectados *lista, char nombre[20], int socket)
 }
 
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+//enviar el id del jugador que se acaba e registar/iicia sesion,por lo tanto el servidro debe envia r la id
+
+
+
 
 void Login(char nombre[25], char contrasena[25], char respuesta[512])
 {
@@ -274,7 +141,7 @@ void Login(char nombre[25], char contrasena[25], char respuesta[512])
 		exit (1);
 	}
 	
-	err=mysql_query(conn, "use Base_de_Datos;");
+	err=mysql_query(conn, "use bdd;");
 	if (err!=0)
 	{
 		printf ("Error al acceder a la base de datos %u %s\n",
@@ -339,7 +206,7 @@ void Registrar(char nombre[25], char contrasena[25], char respuesta[512])
 		exit (1);
 	}
 	
-	err=mysql_query(conn, "use Base_de_Datos;");
+	err=mysql_query(conn, "use bd;");
 	if (err!=0)
 	{
 		printf ("Error al acceder a la base de datos %u %s\n",
@@ -400,7 +267,7 @@ void NombreJugadorDuracionMayor3(char respuesta[512])
 		exit (1);
 	}
 	
-	err=mysql_query(conn, "use Base_de_Datos;");
+	err=mysql_query(conn, "use bd;");
 	if (err!=0)
 	{
 		printf ("Error al acceder a la base de datos %d %s\n",
@@ -467,7 +334,7 @@ void JugadoresJugadoMismoDiaPere(char respuesta[512])
 		exit (1);
 	}
 	
-	err=mysql_query(conn, "use Base_de_Datos;");
+	err=mysql_query(conn, "use bd;");
 	if (err!=0)
 	{
 		printf ("Error al acceder a la base de datos %u %s\n",
@@ -532,7 +399,7 @@ void DameID(char nombre[50], char respuesta[512])
 		exit (1);
 	}
 	
-	err=mysql_query(conn, "use Base_de_Datos;");
+	err=mysql_query(conn, "use bd;");
 	if (err!=0)
 	{
 		printf ("Error al acceder a la base de datos %u %s\n",
@@ -568,6 +435,205 @@ void DameID(char nombre[50], char respuesta[512])
 	mysql_close(conn);
 }
 
+void EnviarPosicionJugador(int clientSocket) 
+{
+	char buffer[1024] = {0};
+	int i;
+	for (i = 0; i < 3 ; i++) {
+		if (jugadores[i].clientSocket != 0 && jugadores[i].clientSocket != clientSocket) {
+			sprintf(buffer, "%f,%f", jugadores[i].positionX, jugadores[i].positionY);
+			send(jugadores[i].clientSocket, buffer, strlen(buffer), 0);
+		}
+	}
+}
+
+void *atenderCliente(void *socket)
+{
+	int jugadorPosicionX = 0;
+	int jugadorPosicionY = 0;
+	int jugadorIndex = -1;
+	
+	int sock_conn, ret;
+	int *s;
+	s = (int *) socket;
+	int temp_sock = *s; // Variable temporal para desreferenciar el puntero
+	sock_conn = temp_sock;
+	
+	char peticion[512];
+	char respuesta[512];
+	char contestacion[512];
+	char contrasena[20];
+	char nombre[25];
+	char fecha[11];
+	int id;
+	char numero;
+	
+	char conectados[300];
+	int conexion = 0;
+	int r;
+	int i;
+	
+	while(conexion == 0)
+	{
+		ret=read(sock_conn,peticion, sizeof(peticion));
+		printf ("Recibido\n");
+		peticion[ret]='\0';
+		int error = 1;
+		int codigo = 9999;
+		char *p;
+				
+		if(strlen(peticion) < 2){
+			error = 0;
+		}
+		
+		if (strcmp(peticion, "") != 0){
+			printf ("Peticion: %s\n",peticion);
+			p = strtok(peticion, "-");
+			codigo = atoi(p);
+		}
+		
+		if (error == 0){
+			codigo = 9999;
+		}
+		
+		if(codigo == 0) //LOGIN
+		{
+			pthread_mutex_lock(&mutex);
+			p = strtok(NULL, "-");
+			if(p != NULL){
+				strcpy(numero, p);
+				printf("Codigo de conexion: %d\n", r);
+				p = strtok(NULL, "-");
+				if(p != NULL){
+					strcpy(nombre, p);
+					p = strtok(NULL, "-");
+					if(p != NULL){
+						strcpy(contrasena, p);
+						printf("Numero: %d, Codigo: %d, Nombre: %s y Contrase￱a: %s\n", numero,codigo, nombre, contrasena);
+						Login(nombre, contrasena, contestacion);
+			
+						if(strcmp (contestacion, "Error") != 0)
+							r = Conectar(&lista, nombre, socket);
+				
+						DameConectados(&lista, conectados);
+						sprintf(respuesta, "%s", contestacion);
+						write (sock_conn,respuesta,strlen(respuesta));
+					}
+				}
+			}
+			pthread_mutex_unlock(&mutex);
+		}
+		else if(codigo == 1) //REGISTRAR
+		{
+			pthread_mutex_lock(&mutex);
+			p = strtok(NULL, "-");
+			if(p != NULL){
+				strcpy(id, p);
+				p = strtok(NULL, "-");
+			if(p != NULL){
+				strcpy(nombre, p);
+				p = strtok(NULL, "-");
+					if(p != NULL){
+						p = strtok(NULL, "-");
+						strcpy(contrasena, p);
+						printf("Codigo: %d, Nombre: %s y Contrase￱a: %s\n", codigo, nombre, contrasena);
+						Registrar(nombre, contrasena, contestacion);
+						if(strcmp (contestacion, "Error") != 0)
+							r = Conectar(&lista, nombre,(void*) socket);
+						
+						////revisar si funciona ya si no quiar el (void*)
+						
+						DameConectados(&lista, conectados);
+						sprintf(respuesta, "%s", contestacion);
+						write (sock_conn,respuesta,strlen(respuesta));			
+					}
+				}
+			}
+			pthread_mutex_unlock(&mutex);
+		}
+		else if(codigo == 2)
+		{
+			pthread_mutex_lock(&mutex);
+			p = strtok(NULL, "-");
+			strcpy(fecha, p);
+			printf("Codigo: %d, Fecha: %s\n", codigo, fecha);
+			JugadoresJugadoMismoDiaPere(contestacion);
+			sprintf(respuesta, "%s", contestacion);
+			write (sock_conn,respuesta,strlen(respuesta));
+			pthread_mutex_unlock(&mutex);
+		}
+		else if(codigo == 3)
+		{
+			pthread_mutex_lock(&mutex);
+			p = strtok(NULL, "-");
+			strcpy(fecha, p);
+			printf("Codigo: %d, Fecha: %s\n", codigo, fecha);
+			NombreJugadorDuracionMayor3(contestacion);
+			sprintf(respuesta, "%s", contestacion);
+			write (sock_conn,respuesta,strlen(respuesta));
+			pthread_mutex_unlock(&mutex);
+		}
+		/*else if(codigo == 3)
+		{
+		pthread_mutex_lock(&mutex);
+		p = strtok(NULL, "-");
+		strcpy(fecha, p);
+		printf("Codigo: %d, Fecha: %s\n", codigo, fecha);
+		DameID(nombre, contestacion);
+		sprintf(respuesta, "%s", contestacion);
+		write (sock_conn,respuesta,strlen(respuesta));
+		pthread_mutex_unlock(&mutex);
+		}*/
+		
+		else if(codigo == 5) //DESCONECTAR
+		{
+			pthread_mutex_lock(&mutex);
+			p = strtok(NULL, "-");
+			strcpy(nombre, p);
+			conexion = 1;
+			printf("Desconectando a %s\n", nombre);
+			r = Desconectar(&lista, nombre);
+			printf("Codigo de desconexion: %d\n", r);
+			DameConectados(&lista, conectados);
+			close(sock_conn);
+			pthread_mutex_unlock(&mutex);
+		}
+		else  if(codigo==6){
+			pthread_mutex_lock(&mutex);
+			p=strtok(NULL,"-");
+			int nuevaPosicionX=atoi(p);
+			p=strtok(NULL,"-");
+			int nuevaPosicionY=atoi(p);
+			printf("Actualizar posici￳n: X=%d, Y=%d\n",nuevaPosicionX,nuevaPosicionY);
+			
+			//Actualizar la posicion del jugador en la estructura de datos
+			jugadores[jugadorIndex].positionX=nuevaPosicionX;
+			jugadores[jugadorIndex].positionY=nuevaPosicionY;
+			
+			pthread_mutex_unlock(&mutex);
+			
+			//enviar laa posicion nueva a todos los jugadores conectados
+			EnviarPosicionJugador(sock_conn);
+		}
+		
+		else if (codigo == 1 || codigo == 4 || codigo == 5)
+		{
+			pthread_mutex_lock(&mutex);
+			int j;
+			DameConectados(&lista, conectados);
+			sprintf(respuesta, "6-%s", conectados);
+			printf("%s\n", respuesta);
+			pthread_mutex_unlock(&mutex);
+			for (j = 0; j < lista.num; j++)
+			{
+				write (sockets[j],respuesta,strlen(respuesta));
+			}
+		}
+		else{
+			printf("Peticion no existe\n");
+		}
+	}
+}
 
 int main(int argc, char *argv[])
 {
@@ -577,12 +643,14 @@ int main(int argc, char *argv[])
 	pthread_t thread;
 	lista.num = 0;
 	int conexion = 0;
-	int puerto = 5051;
+	int puerto = 5062;
 	int i = 0;
 	
 	//abrimos el socket
-	if ((sock_listen = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+	if ((sock_listen = socket(AF_INET, SOCK_STREAM, 0)) < 0){
 		printf("Error al crear socket\n");
+		exit(EXIT_FAILURE);	
+	}
 	//Bind en el puerto
 	memset(&serv_adr, 0, sizeof(serv_adr));
 	serv_adr.sin_family = AF_INET;
@@ -590,12 +658,16 @@ int main(int argc, char *argv[])
 	serv_adr.sin_addr.s_addr = htonl(INADDR_ANY);
 	//establecemos puerto de escucha
 	serv_adr.sin_port = htons(puerto);
-	if (bind(sock_listen, (struct sockaddr *) &serv_adr, sizeof(serv_adr)) < 0)
+	if (bind(sock_listen, (struct sockaddr *) &serv_adr, sizeof(serv_adr)) < 0){
 		printf ("Error en el bind\n");
+		exit(EXIT_FAILURE);	
+	}
 	
-	if (listen(sock_listen, 3) < 0)
+	if (listen(sock_listen, 3) < 0){
 		printf("Error en el Listen\n");
-	
+		exit(EXIT_FAILURE);	
+	}
+
 	int rc;
 	
 	while(conexion == 0)
@@ -608,7 +680,7 @@ int main(int argc, char *argv[])
 		
 		sockets[i] = sock_conn;
 		
-		rc = pthread_create (&thread, NULL, *atenderCliente , &sockets[i]);
+		rc = pthread_create (&thread, NULL, atenderCliente , &sockets[i]);
 		printf("Codigo %d = %s\n", rc, strerror(rc));
 		
 		i++;
