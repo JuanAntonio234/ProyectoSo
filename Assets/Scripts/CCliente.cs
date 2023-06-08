@@ -92,6 +92,7 @@ public class CCliente : MonoBehaviour
             IPEndPoint ip = new IPEndPoint(direccion, puerto);
 
             clienteSocket.Connect(ip);
+            jugadorLocal = Instantiate(prefabJugador, Vector3.zero, Quaternion.identity);
 
         }
         catch (Exception ex)
@@ -205,26 +206,27 @@ public class CCliente : MonoBehaviour
                         });
                     }
                     break;
-                case 5://lista jugadores conectados
-                    UnityMainThreadDispatcher.Instance().Enqueue(() =>
+                case 5:
+                    if (codigo == 6)//lista jugadores conectados
                     {
-                        int numeroConectados = int.Parse(trozos[1]);
-                        List<string> jugadoresConectados = GetConnectedPlayersList(mensaje);
-
-                        for (int i = 0; i < numeroConectados; i++)
+                        UnityMainThreadDispatcher.Instance().Enqueue(() =>
                         {
+                            int numeroConectados = int.Parse(trozos[1]);
+                            List<string> jugadoresConectados = new List<string>();
+                            for (int i = 0; i < numeroConectados; i++)
+                            {
+                                jugadoresConectados.Add(trozos[i + 2]);
+                            }
+
+                            string jugadoresConectadosStr = "";
                             foreach (string jugador in jugadoresConectados)
                             {
-                                texto.text = jugador;
+                                jugadoresConectadosStr += jugador + ", ";
                             }
-                        }
-                    });
-                    ///creo que mejor poner text y asignar uno a uno//////////////////////////////////////////
-                    ////////////////////////////////////////////
-                    ///////////////////////////////////////////
-                    ///////////////////////////////////////////
-                    //////////////////////////////////////////
 
+                            texto.text = "Jugadores conectados: " + jugadoresConectadosStr;
+                        });
+                    }
                     break;
                 case 6:
                     if (mensaje != "6-ERROR")
@@ -397,26 +399,5 @@ public class CCliente : MonoBehaviour
             Debug.Log("No se ha podido conectar con el servidor: " + ex);
             return;
         }
-    }
-
-    //la lista la obtengo del servidor
-    public List<string> GetConnectedPlayersList(string stringJugador)
-    {
-        List<string> jugadoresConectados = new List<string>();
-        string[] ArrayJugadores = stringJugador.Split('-');
-        int numeroConectados = int.Parse(ArrayJugadores[1]);
-
-        UnityMainThreadDispatcher.Instance().Enqueue(() =>
-        {
-            for (int i = 0; i < numeroConectados; i++)
-            {
-                string Jugador = ArrayJugadores[i + 2];
-                string[] informacionJugador = Jugador.Split('|');
-                string nombreJugador = informacionJugador[0];
-                string estadoJugador = informacionJugador[1];
-                jugadoresConectados.Add(nombreJugador);
-            }
-        });
-        return jugadoresConectados;
     }
 }

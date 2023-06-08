@@ -21,7 +21,7 @@ typedef struct {
 typedef struct {
 	Conectado conectados [100];
 	int num;
-} ListaConectados;
+} ListaConectados;*/
 
 
 typedef struct{
@@ -48,7 +48,7 @@ int sockets[100];
 
 int Conectar(ListaConectados *lista, char nombre[20], int socket);
 
-void DameConectados(ListaConectados *lista, char conectados[300])
+void DameConectados(ListaConectados *lista, char conectados[300])//envia lista de conectados
 {
 	int i;
 	sprintf (conectados, "%d", lista->num);
@@ -58,7 +58,7 @@ void DameConectados(ListaConectados *lista, char conectados[300])
 	}
 }
 
-int DamePos(ListaConectados *lista, char nombre[20])
+/*int DamePos(ListaConectados *lista, char nombre[20])
 {
 	int i = 0;
 	int encontrado = 0;
@@ -74,9 +74,9 @@ int DamePos(ListaConectados *lista, char nombre[20])
 		return i;
 	else
 		return -1;
-}
+}*/
 
-int Desconectar(ListaConectados *lista, char nombre[20])
+int Desconectar(ListaConectados *lista, char nombre[20])//desconecta de la lista de conectados al usuario
 {
 	int pos = DamePos(lista, nombre);
 	if (pos == -1)
@@ -93,7 +93,7 @@ int Desconectar(ListaConectados *lista, char nombre[20])
 	}
 }
 
-int Conectar(ListaConectados *lista, char nombre[20], int socket)
+int Conectar(ListaConectados *lista, char nombre[20], int socket)//añade a la lista de conectados al usuario
 {
 	if (lista->num == 100)
 		return -1;
@@ -106,6 +106,9 @@ int Conectar(ListaConectados *lista, char nombre[20], int socket)
 		return 0;
 	}
 }
+
+
+
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -177,6 +180,10 @@ void Login(char nombre[25], char contrasena[25], char respuesta[512])
 		login = 0;
 		sprintf(respuesta, "0-%d", login);
 	}
+	  // Se libera el resultado de la consulta
+    mysql_free_result(resultado);
+
+    mysql_close(conn);
 }
 
 void Registrar(char nombre[25], char contrasena[25], char respuesta[512])
@@ -551,7 +558,7 @@ void *atenderCliente(void *socket)
 			}
 			pthread_mutex_unlock(&mutex);
 		}
-		else if(codigo == 2)
+		else if(codigo == 2)//Consulta (numero de consulta)
 		{
 			pthread_mutex_lock(&mutex);
 			p = strtok(NULL, "-");
@@ -562,7 +569,7 @@ void *atenderCliente(void *socket)
 			write (sock_conn,respuesta,strlen(respuesta));
 			pthread_mutex_unlock(&mutex);
 		}
-		else if(codigo == 3)
+		else if(codigo == 3)//Consulta (numero de consulta)
 		{
 			pthread_mutex_lock(&mutex);
 			p = strtok(NULL, "-");
@@ -598,7 +605,8 @@ void *atenderCliente(void *socket)
 			close(sock_conn);
 			pthread_mutex_unlock(&mutex);
 		}
-		else  if(codigo==6){
+		else  if(codigo==6)//actualiza posicion jugador
+		{
 			pthread_mutex_lock(&mutex);
 			p=strtok(NULL,"-");
 			int nuevaPosicionX=atoi(p);
@@ -615,8 +623,10 @@ void *atenderCliente(void *socket)
 			//enviar laa posicion nueva a todos los jugadores conectados
 			EnviarPosicionJugador(sock_conn);
 		}
-		
-		else if (codigo == 1 || codigo == 4 || codigo == 5)
+		else if(codigo==7){//listaConectados
+
+		}
+		else if (codigo == 0 || codigo == 1 || codigo == 5)//envia la lista de conectados cada vez que se modifica
 		{
 			pthread_mutex_lock(&mutex);
 			int j;
@@ -628,11 +638,11 @@ void *atenderCliente(void *socket)
 			{
 				write (sockets[j],respuesta,strlen(respuesta));
 			}
+			pthread_mutex_unlock(&mutex);
 		}
-		else{
-			printf("Peticion no existe\n");
-		}
+		printf("Nombre: %s\n", nombre);
 	}
+	close(sock_conn);
 }
 
 int main(int argc, char *argv[])
