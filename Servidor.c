@@ -21,7 +21,7 @@ typedef struct {
 typedef struct {
 	Conectado conectados [100];
 	int num;
-} ListaConectados;*/
+} ListaConectados;
 
 
 typedef struct{
@@ -58,7 +58,7 @@ void DameConectados(ListaConectados *lista, char conectados[300])//envia lista d
 	}
 }
 
-/*int DamePos(ListaConectados *lista, char nombre[20])
+int DamePos(ListaConectados *lista, char nombre[20])
 {
 	int i = 0;
 	int encontrado = 0;
@@ -74,7 +74,7 @@ void DameConectados(ListaConectados *lista, char conectados[300])//envia lista d
 		return i;
 	else
 		return -1;
-}*/
+}
 
 int Desconectar(ListaConectados *lista, char nombre[20])//desconecta de la lista de conectados al usuario
 {
@@ -93,7 +93,7 @@ int Desconectar(ListaConectados *lista, char nombre[20])//desconecta de la lista
 	}
 }
 
-int Conectar(ListaConectados *lista, char nombre[20], int socket)//añade a la lista de conectados al usuario
+int Conectar(ListaConectados *lista, char nombre[20], int socket)//a￱ade a la lista de conectados al usuario
 {
 	if (lista->num == 100)
 		return -1;
@@ -180,10 +180,10 @@ void Login(char nombre[25], char contrasena[25], char respuesta[512])
 		login = 0;
 		sprintf(respuesta, "0-%d", login);
 	}
-	  // Se libera el resultado de la consulta
-    mysql_free_result(resultado);
-
-    mysql_close(conn);
+	// Se libera el resultado de la consulta
+	mysql_free_result(resultado);
+	
+	mysql_close(conn);
 }
 
 void Registrar(char nombre[25], char contrasena[25], char respuesta[512])
@@ -488,7 +488,7 @@ void *atenderCliente(void *socket)
 		int error = 1;
 		int codigo = 9999;
 		char *p;
-				
+		
 		if(strlen(peticion) < 2){
 			error = 0;
 		}
@@ -516,12 +516,12 @@ void *atenderCliente(void *socket)
 					p = strtok(NULL, "-");
 					if(p != NULL){
 						strcpy(contrasena, p);
-						printf("Numero: %d, Codigo: %d, Nombre: %s y Contrase￱a: %s\n", numero,codigo, nombre, contrasena);
+						printf("Numero: %d, Codigo: %d, Nombre: %s y Contrase\ufff1a: %s\n", numero,codigo, nombre, contrasena);
 						Login(nombre, contrasena, contestacion);
-			
+						
 						if(strcmp (contestacion, "Error") != 0)
 							r = Conectar(&lista, nombre, socket);
-				
+						
 						DameConectados(&lista, conectados);
 						sprintf(respuesta, "%s", contestacion);
 						write (sock_conn,respuesta,strlen(respuesta));
@@ -537,13 +537,13 @@ void *atenderCliente(void *socket)
 			if(p != NULL){
 				strcpy(id, p);
 				p = strtok(NULL, "-");
-			if(p != NULL){
-				strcpy(nombre, p);
-				p = strtok(NULL, "-");
+				if(p != NULL){
+					strcpy(nombre, p);
+					p = strtok(NULL, "-");
 					if(p != NULL){
 						p = strtok(NULL, "-");
 						strcpy(contrasena, p);
-						printf("Codigo: %d, Nombre: %s y Contrase￱a: %s\n", codigo, nombre, contrasena);
+						printf("Codigo: %d, Nombre: %s y Contrase\ufff1a: %s\n", codigo, nombre, contrasena);
 						Registrar(nombre, contrasena, contestacion);
 						if(strcmp (contestacion, "Error") != 0)
 							r = Conectar(&lista, nombre,(void*) socket);
@@ -605,14 +605,14 @@ void *atenderCliente(void *socket)
 			close(sock_conn);
 			pthread_mutex_unlock(&mutex);
 		}
-		else  if(codigo==6)//actualiza posicion jugador
+		else if(codigo==6)//actualiza posicion jugador
 		{
 			pthread_mutex_lock(&mutex);
 			p=strtok(NULL,"-");
 			int nuevaPosicionX=atoi(p);
 			p=strtok(NULL,"-");
 			int nuevaPosicionY=atoi(p);
-			printf("Actualizar posici￳n: X=%d, Y=%d\n",nuevaPosicionX,nuevaPosicionY);
+			printf("Actualizar posici\ufff3n: X=%d, Y=%d\n",nuevaPosicionX,nuevaPosicionY);
 			
 			//Actualizar la posicion del jugador en la estructura de datos
 			jugadores[jugadorIndex].positionX=nuevaPosicionX;
@@ -624,7 +624,7 @@ void *atenderCliente(void *socket)
 			EnviarPosicionJugador(sock_conn);
 		}
 		else if(codigo==7){//listaConectados
-
+			
 		}
 		else if (codigo == 0 || codigo == 1 || codigo == 5)//envia la lista de conectados cada vez que se modifica
 		{
@@ -677,7 +677,7 @@ int main(int argc, char *argv[])
 		printf("Error en el Listen\n");
 		exit(EXIT_FAILURE);	
 	}
-
+	
 	int rc;
 	
 	while(conexion == 0)
