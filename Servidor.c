@@ -22,7 +22,9 @@ typedef struct {
 	Conectado conectados [100];
 	int num;
 } ListaConectados;
-typedef struct{
+	
+	
+	typedef struct{
 	char jugado[4][15];
 	int socket[5];
 	int ocupado;
@@ -58,20 +60,20 @@ void DameConectados(ListaConectados *lista, char conectados[300])//envia lista d
 
 int DamePos(ListaConectados *lista, char nombre[20])
 {
-	int i = 0;
-	int encontrado = 0;
-	printf("Lista nombre : %s\n", lista->conectados[i].nombre);
-	while ((i<lista->num) && !encontrado)
-	{
-		if (strcmp(lista->conectados[i].nombre, nombre) == 0)
-			encontrado = 1;
-		if (!encontrado)
-			i++;
-	}
-	if (encontrado)
-		return i;
-	else
-		return -1;
+int i = 0;
+int encontrado = 0;
+printf("Lista nombre : %s\n", lista->conectados[i].nombre);
+while ((i<lista->num) && !encontrado)
+{
+if (strcmp(lista->conectados[i].nombre, nombre) == 0)
+encontrado = 1;
+if (!encontrado)
+i++;
+}
+if (encontrado)
+return i;
+else
+return -1;
 }
 
 int Desconectar(ListaConectados *lista, char nombre[20])//desconecta de la lista de conectados al usuario
@@ -179,8 +181,6 @@ void Login(char nombre[25], char contrasena[25], char respuesta[512])
 		sprintf(respuesta, "0-%d", login);
 	}
 // Se libera el resultado de la consulta
-=======
-
 	mysql_free_result(resultado);
 	
 	mysql_close(conn);
@@ -489,10 +489,6 @@ void *atenderCliente(void *socket)
 		int codigo = 9999;
 		char *p;
 		
-		if(strlen(peticion) < 2){
-			error = 0;
-		}
-		
 		
 			printf ("Peticion: %s\n",peticion);
 			p = strtok(peticion, "-");
@@ -534,7 +530,7 @@ void *atenderCliente(void *socket)
 				strcpy(id, p);
 				p = strtok(NULL, "-");
 				if(p != NULL){
-					strcpy(nombre, p);
+					strcpy(nombre, p);SIGSEGV
 					p = strtok(NULL, "-");
 					if(p != NULL){
 						p = strtok(NULL, "-");
