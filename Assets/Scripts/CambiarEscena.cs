@@ -27,4 +27,8 @@ public class CambiarEscena : MonoBehaviour
     {
         SceneManager.LoadScene("MenuJuego");
     }
+    public void IrAJuego()
+    {
+        SceneManager.LoadScene("Juego");
+    }
 }

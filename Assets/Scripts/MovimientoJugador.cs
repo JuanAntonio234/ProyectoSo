@@ -15,10 +15,14 @@ public class MovimientoJugador : MonoBehaviour
 
     private Vector3 posicionActual;
     private Socket clienteSocket;
+     private GameObject prefabJugador; // Asigna el prefab del jugador 
+    private GameObject jugadorLocal;
 
     // Start is called before the first frame update
     void Start()
     {
+        jugadorLocal = Instantiate(prefabJugador, Vector3.zero, Quaternion.identity);
+
         rigidbody2 = GetComponent<Rigidbody2D>();
         posicionActual = transform.position;
 

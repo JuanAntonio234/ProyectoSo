@@ -396,6 +396,7 @@ MonoBehaviour:
   Consulta1: {fileID: 0}
   Consulta2: {fileID: 0}
   Consulta3: {fileID: 0}
+  prefabJugador: {fileID: 6008250146769113889, guid: fe84a146f84c00148bbf94771faedffa, type: 3}
 --- !u!1 &506798740
 GameObject:
   m_ObjectHideFlags: 0

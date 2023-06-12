@@ -59,6 +59,8 @@ public class CCliente : MonoBehaviour
     Thread atender;
 
     public TMP_Text texto;
+    public TMP_Text textMensaje;
+    public TMP_Text invitacionAceptadaRechazada;
 
     private byte[] recibirbuffer = new byte[1024];
 
@@ -66,6 +68,8 @@ public class CCliente : MonoBehaviour
     public TMP_InputField PasswordInput;
     public TMP_InputField ConfirmPasswordInput;
     public TMP_InputField IdInput;
+    public TMP_InputField HostInput;
+    public TMP_InputField InvitadoInput;
 
     public Button Consulta1;
     public Button Consulta2;
@@ -73,6 +77,7 @@ public class CCliente : MonoBehaviour
 
     private GameObject prefabJugador; // Asigna el prefab del jugador 
     private GameObject jugadorLocal;
+    public GameObject PanelInvitacion;
 
     private string nombreJugador;
 
@@ -80,25 +85,9 @@ public class CCliente : MonoBehaviour
 
     private byte[] buffer;
 
-
-    private void Start()
+   private void Start()
     {
-        try
-        {
-            clienteSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
-            int puerto = 5062;
-            IPAddress direccion = IPAddress.Parse("192.168.56.102");
-            IPEndPoint ip = new IPEndPoint(direccion, puerto);
-
-            clienteSocket.Connect(ip);
-            jugadorLocal = Instantiate(prefabJugador, Vector3.zero, Quaternion.identity);
-
-        }
-        catch (Exception ex)
-        {
-            Debug.Log("Error: " + ex.Message);
-        }
+        CerrarPanel();
     }
     private void AtenderServidor()
     {
@@ -106,38 +95,39 @@ public class CCliente : MonoBehaviour
         {
             byte[] msg = new byte[1024];
             servidor.Receive(msg);
-            string[] trozos = Encoding.ASCII.GetString(msg).Split('-');
-            int codigo = Convert.ToInt32(trozos[0]);
             string mensaje = Encoding.ASCII.GetString(msg).Split('\0')[0];
+            string[] trozos = Encoding.ASCII.GetString(msg).Split('-');
+            int codigo;
+            try
+            {
+                codigo = Convert.ToInt32(trozos[0]);
+                mensaje = trozos[1];
+
+            }catch(System.FormatException)
+            {
+                codigo=0;
+            }
 
             switch (codigo)
             {
                 case 0://Login
                     if (mensaje == "0-0")
                     {
-                        UnityMainThreadDispatcher.Instance().Enqueue(() =>
-                        {
                             texto.text = "Se ha accedido correctamente a la cuenta";
                             Debug.Log("Se ha accedido correctamente a la cuenta");
-                        });
                     }
                     else if (mensaje == "Error")
                     {
-                        UnityMainThreadDispatcher.Instance().Enqueue(() =>
-                        {
                             texto.text = "Error";
                             Debug.Log("Usuario o contraseña incorrecta");
-                        });
                     }
                     break;
                 case 1://Registrar
                     if (mensaje == "1-0")
                     {
-                        UnityMainThreadDispatcher.Instance().Enqueue(() =>
-                        {
+
                             texto.text = "Registrado correctamente";
                             Debug.Log("Registrado Correctamente");
-                        });
                     }
                     else if (mensaje == "Error")
                     {
@@ -148,6 +138,9 @@ public class CCliente : MonoBehaviour
                         });
                     }
                     break;
+
+                    //Modificar todas las consultas
+/*
                 case 2://consulta (numero consulta)
                     if (mensaje == "2")
                     {
@@ -205,12 +198,12 @@ public class CCliente : MonoBehaviour
                             Debug.Log("No se encuentran datos que coincidan");
                         });
                     }
-                    break;
+                    break;*/
+
+
                 case 5:
                     if (codigo == 6)//lista jugadores conectados
                     {
-                        UnityMainThreadDispatcher.Instance().Enqueue(() =>
-                        {
                             int numeroConectados = int.Parse(trozos[1]);
                             List<string> jugadoresConectados = new List<string>();
                             for (int i = 0; i < numeroConectados; i++)
@@ -225,19 +218,30 @@ public class CCliente : MonoBehaviour
                             }
 
                             texto.text = "Jugadores conectados: " + jugadoresConectadosStr;
-                        });
                     }
                     break;
-                case 6:
-                    if (mensaje != "6-ERROR")
+                case 6://invitacion a partida
+                    if (codigo==7)
                     {
-                        UnityMainThreadDispatcher.Instance().Enqueue(() =>
-                        {
-                            Convert.ToString(mensaje);
-                            string Partida = mensaje.Split('-')[1];
-                            string invitacion = mensaje.Split('-')[2];
-                            texto.text = "El jugador te ha invitado a jugar";
-                        });
+                        AbrirPanel();
+                        string nombreHost = mensaje.Split('-')[0];
+                        textMensaje.text = nombreHost + "te ha invitado a jugar";
+                    }
+                    break;
+                case 7://respuesta invitacion a partida
+
+
+                    string host = mensaje.Split('-')[0];
+                    string respuesta = mensaje.Split('-')[1];
+                    if (respuesta == "SI")
+                    {
+                        CerrarPanel();
+                        SceneManager.LoadScene("Juego"); 
+                    }
+                    else if (respuesta == "NO")
+                    {
+                        CerrarPanel();
+                        invitacionAceptadaRechazada.text = "El jugador ha rechazado la invitacion. Vuelve a invitar a alguien para poder jugar.";
                     }
                     break;
                 case -1://desconectar
@@ -251,35 +255,36 @@ public class CCliente : MonoBehaviour
             }
         }
     }
-    /*  public void Conectarse()
+     public void Conectarse()
      {
-         servidor = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        Socket servidor = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-         IPAddress direccion = IPAddress.Parse("192.168.56.102");
-         IPEndPoint ip = new IPEndPoint(direccion, puerto);
+        IPAddress direccion = IPAddress.Parse("192.168.56.102");
+        IPEndPoint ip = new IPEndPoint(direccion, 5064);
 
-         //Creamos el socket 
+        //Creamos el socket 
 
-         try
+        try
          {
              servidor.Connect(ip);
              UnityMainThreadDispatcher.Instance().Enqueue(() =>
              {
-                 texto.text = "Conectado correctamente";
                  Debug.Log("Conectado");
+
              });
-         }
-         catch (SocketException ex)
+        //    jugadorLocal = Instantiate(prefabJugador, Vector3.zero, Quaternion.identity);
+
+        }
+        catch (SocketException ex)
          {
              UnityMainThreadDispatcher.Instance().Enqueue(() =>
              {
-                 texto.text = "no se ha podido conectar con el servidor:";
                  Debug.Log("no se ha podido conectar con el servidor:" + ex);
              });
 
              return;
          }
-     }*/
+     }
     public void IniciarSesion()
     {
         try
@@ -311,8 +316,19 @@ public class CCliente : MonoBehaviour
     }
     public void Registrar()
     {
+        Socket servidor = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
+        IPAddress direccion = IPAddress.Parse("192.168.56.102");
+        IPEndPoint ip = new IPEndPoint(direccion, 5064);
+
+        //Creamos el socket 
         try
         {
+            servidor.Connect(ip);
+
+            Debug.Log("Conectado");
+
+  
             string Name = NameInput.text;
             string Password = PasswordInput.text;
             string PasswordConfirm = ConfirmPasswordInput.text;
@@ -323,24 +339,24 @@ public class CCliente : MonoBehaviour
                 string registrar = "1" + "-" + ID + "-" + Name + "-" + Password;
                 byte[] mensaje1 = System.Text.Encoding.ASCII.GetBytes(registrar);
                 servidor.Send(mensaje1);
-                UnityMainThreadDispatcher.Instance().Enqueue(() =>
-                {
+
                     SceneManager.LoadScene("MenuJuego");
-                });
-                jugadorLocal = Instantiate(prefabJugador, Vector3.zero, Quaternion.identity);
+
+               // jugadorLocal = Instantiate(prefabJugador, Vector3.zero, Quaternion.identity);
             }
             else if (PasswordInput.text != ConfirmPasswordInput.text)
             {
                 texto.text = "Contraseña incorrecta.";
             }
         }
-        catch (SocketException e)
+        catch (SocketException ex)
         {
-            UnityMainThreadDispatcher.Instance().Enqueue(() =>
-            {
-                texto.text = "No se ha podido conectar con el servidor: " + e.Message;
-                Debug.Log("No se ha podido conectar con el servidor: " + e.Message);
-            });
+            Debug.Log("no se ha podido conectar con el servidor:" + ex);
+
+
+                texto.text = "No se ha podido conectar con el servidor: " + ex.Message;
+                Debug.Log("No se ha podido conectar con el servidor: " + ex.Message);
+
             return;
         }
     }
@@ -351,12 +367,11 @@ public class CCliente : MonoBehaviour
     {
         try
         {
-            UnityMainThreadDispatcher.Instance().Enqueue(() =>
-            {
+
                 string QUEry1 = "1";
                 byte[] mensaje = System.Text.Encoding.ASCII.GetBytes(QUEry1);
                 servidor.Send(mensaje);
-            });
+
         }
         catch (SocketException ex)
         {
@@ -400,4 +415,19 @@ public class CCliente : MonoBehaviour
             return;
         }
     }
+    public void AbrirPanel()
+    {
+        PanelInvitacion.SetActive(true);
+
+    }
+    public void CerrarPanel()
+    {
+        PanelInvitacion.SetActive(false);
+    }
+    //invitar
+    public void Invitar()
+    {
+        
+    }
+
 }
