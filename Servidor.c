@@ -107,10 +107,6 @@ int Conectar(ListaConectados *lista, char nombre[20], int socket)//a￱ade a la 
 	}
 }
 
-
-
-
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -144,7 +140,7 @@ void Login(char nombre[25], char contrasena[25], char respuesta[512])
 		exit (1);
 	}
 	
-	err=mysql_query(conn, "use bdd;");
+	err=mysql_query(conn, "use bd;");
 	if (err!=0)
 	{
 		printf ("Error al acceder a la base de datos %u %s\n",
@@ -169,14 +165,14 @@ void Login(char nombre[25], char contrasena[25], char respuesta[512])
 	row = mysql_fetch_row (resultado);
 	if (row == NULL)
 	{
-		printf ("Nombre o contrase\ufff1a incorrectos\n");
+		printf ("Nombre o contrasena incorrectos\n");
 		login = -1;
 		sprintf(respuesta, "Error");
 	}
 	
 	else
 	{
-		printf ("Ha iniciado sesi\ufff3n el usuario con id: %s\n", row[0]);
+		printf ("Ha iniciado sesion el usuario con id: %s\n", row[0]);
 		login = 0;
 		sprintf(respuesta, "0-%d", login);
 	}
@@ -185,8 +181,33 @@ void Login(char nombre[25], char contrasena[25], char respuesta[512])
 	
 	mysql_close(conn);
 }
-
-void Registrar(char nombre[25], char contrasena[25], char respuesta[512])
+int verificarID(MYSQL *conn, int id){
+	char consulta[500];
+	MYSQL_RES *resultado;
+	MYSQL_ROW row;
+	int numFilas=0;
+	
+	sprintf(consulta, "SELECT COUNT(ID) FROM JUGADOR WHERE ID = %d;",id);
+	if(mysql_query(conn,consulta)!=0){
+		printf("Error al consultar los datos de la base de datos: %u %s\n",
+			   mysql_errno(conn), mysql_error(conn));
+		return -1;
+	}
+	
+	resultado =mysql_store_result(conn);
+	if(resultado==NULL){
+		printf("Error al almacenar el resultado de la consulta: %u %s\n",
+			   mysql_errno(conn), mysql_error(conn));
+		return -1;
+	}
+	row =mysql_fetch_row(resultado);
+	numFilas=atoi(row[0]);
+	
+	mysql_free_result(resultado);
+	
+	return numFilas;
+}
+void Registrar(int id,char nombre[25], char contrasena[25], char respuesta[512])
 {
 	MYSQL *conn;
 	int err;
@@ -194,7 +215,6 @@ void Registrar(char nombre[25], char contrasena[25], char respuesta[512])
 	MYSQL_ROW row;
 	
 	char consulta[500];
-	int registro;
 	int numJ;
 	
 	conn = mysql_init(NULL);
@@ -220,30 +240,43 @@ void Registrar(char nombre[25], char contrasena[25], char respuesta[512])
 				mysql_errno(conn), mysql_error(conn));
 		exit (1);
 	}
-	
+	if(verificarID(conn,id)>0){
+		sprintf(respuesta, "Error: La ID ya existe");
+	}else{
+	//numero total de registros de jugadores en la lista
 	err=mysql_query (conn, "select count(ID) from JUGADOR;");
+	if (err != 0)
+	{
+		printf("Error al consultar datos de la base: %u %s\n", mysql_errno(conn), mysql_error(conn));
+		exit(1);
+	}
 	resultado = mysql_store_result (conn);
+	if (resultado == NULL)
+	{
+		printf("Error al almacenar el resultado de la consulta: %u %s\n", mysql_errno(conn), mysql_error(conn));
+		exit(1);
+	}
 	
 	row = mysql_fetch_row (resultado);
 	
 	numJ = atoi(row[0]);
 	numJ++;
-	printf("Este es el numero: %d\n", numJ);
+	printf("Es la persona numero: %d\n", numJ);
 	
-	int numero = numJ;
-	sprintf(consulta, "insert into JUGADOR values (%d,'%s','%s');", numJ, nombre, contrasena);
+	sprintf(consulta, "INSERT INTO JUGADOR (ID, NOMBRE, PASSWORD, PARTIDAS_GANADAS, PARTIDAS_PERDIDAS) VALUES (%d, '%s', '%s', 0, 0);", id, nombre, contrasena);
 	err=mysql_query (conn, consulta);
 	if (err!=0)
 	{
-		printf ("Error al consultar datos de la base %u %s\n",
-				mysql_errno(conn), mysql_error(conn));
-		exit (1);
+		printf("Error al insertar datos en la base: %u %s\n", mysql_errno(conn), mysql_error(conn));
+		exit(1);
 		sprintf(respuesta, "Error");
 	}
 	
 	else
 	{
 		sprintf(respuesta, "1-0");
+	}
+	
 	}
 	mysql_free_result(resultado);
 	mysql_close(conn);
@@ -487,67 +520,47 @@ void *atenderCliente(void *socket)
 		peticion[ret]='\0';
 		int error = 1;
 		int codigo = 9999;
-		char *p;
-		
-		
-			printf ("Peticion: %s\n",peticion);
-			p = strtok(peticion, "-");
-			codigo = atoi(p);
+		printf ("Peticion: %s\n",peticion);
+		char *p = strtok(peticion, "-");
+		codigo = atoi(p);
 		
 		
 		if(codigo == 0) //LOGIN
 		{
-			pthread_mutex_lock(&mutex);
-			p = strtok(NULL, "-");
-			if(p != NULL){
-				strcpy(numero, p);
-				printf("Codigo de conexion: %d\n", r);
 				p = strtok(NULL, "-");
-				if(p != NULL){
 					strcpy(nombre, p);
 					p = strtok(NULL, "-");
-					if(p != NULL){
 						strcpy(contrasena, p);
-						printf("Numero: %d, Codigo: %d, Nombre: %s y Contrase\ufff1a: %s\n", numero,codigo, nombre, contrasena);
+						printf("Codigo: %d, Nombre: %s y Contrase￱a: %s\n",codigo, nombre, contrasena);
 						Login(nombre, contrasena, contestacion);
-						
+						pthread_mutex_lock(&mutex);
 						if(strcmp (contestacion, "Error") != 0)
-							r = Conectar(&lista, nombre, socket);
-						
+						r = Conectar(&lista, nombre, socket);
 						DameConectados(&lista, conectados);
 						sprintf(respuesta, "%s", contestacion);
-						write (sock_conn,respuesta,strlen(respuesta));
-					}
-				}
-			}
+					write (sock_conn,respuesta,strlen(respuesta));
+			
 			pthread_mutex_unlock(&mutex);
 		}
 		else if(codigo == 1) //REGISTRAR
 		{
-			pthread_mutex_lock(&mutex);
 			p = strtok(NULL, "-");
-			if(p != NULL){
-				strcpy(id, p);
-				p = strtok(NULL, "-");
-				if(p != NULL){
-					strcpy(nombre, p);SIGSEGV
-					p = strtok(NULL, "-");
-					if(p != NULL){
-						p = strtok(NULL, "-");
-						strcpy(contrasena, p);
-						printf("Codigo: %d, Nombre: %s y Contrase\ufff1a: %s\n", codigo, nombre, contrasena);
-						Registrar(nombre, contrasena, contestacion);
-						if(strcmp (contestacion, "Error") != 0)
-							r = Conectar(&lista, nombre,(void*) socket);
-						
-						////revisar si funciona ya si no quiar el (void*)
-						
-						DameConectados(&lista, conectados);
-						sprintf(respuesta, "%s", contestacion);
-						write (sock_conn,respuesta,strlen(respuesta));			
-					}
-				}
-			}
+			printf("%s\n", p);
+			id=atoi(p);
+			p = strtok(NULL, "-");
+			strcpy(nombre, p);
+			printf("%s\n", nombre);
+			p = strtok(NULL, "-");
+			printf("%s\n", p);
+			strcpy(contrasena, p);
+			printf("Codigo: %d, Nombre: %s y Contrase￱a: %s\n", codigo, nombre, contrasena);
+			Registrar(id,nombre, contrasena, contestacion);
+			pthread_mutex_lock(&mutex);
+			if(strcmp (contestacion, "Error") != 0)
+				r = Conectar(&lista, nombre,(void*) socket);
+			DameConectados(&lista, conectados);
+			sprintf(respuesta, "%s", contestacion);
+			write (sock_conn,respuesta,strlen(respuesta));			
 			pthread_mutex_unlock(&mutex);
 		}
 		else if(codigo == 2)//Consulta (numero de consulta)
@@ -645,7 +658,7 @@ int main(int argc, char *argv[])
 	pthread_t thread;
 	lista.num = 0;
 	int conexion = 0;
-	int puerto = 5064;
+	int puerto = 5062;
 	int i = 0;
 	
 	//abrimos el socket

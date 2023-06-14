@@ -1468,6 +1468,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 852331211}
+        m_TargetAssemblyTypeName: CCliente, Assembly-CSharp
+        m_MethodName: Desconectarse
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &794450164
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1616,6 +1628,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: baed5d2d945fba44e901320d23bae592, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  panelInvitacion1: {fileID: 0}
   texto: {fileID: 157323512}
   textMensaje: {fileID: 1506933030}
   invitacionAceptadaRechazada: {fileID: 1793577805}
@@ -1628,7 +1641,6 @@ MonoBehaviour:
   Consulta1: {fileID: 0}
   Consulta2: {fileID: 0}
   Consulta3: {fileID: 0}
-  PanelInvitacion: {fileID: 2070214599}
 --- !u!1 &869946604
 GameObject:
   m_ObjectHideFlags: 0

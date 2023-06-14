@@ -58,6 +58,8 @@ public class CCliente : MonoBehaviour
     Socket servidor;
     Thread atender;
 
+    public PanelInvitacion panelInvitacion1;
+
     public TMP_Text texto;
     public TMP_Text textMensaje;
     public TMP_Text invitacionAceptadaRechazada;
@@ -77,17 +79,15 @@ public class CCliente : MonoBehaviour
 
     private GameObject prefabJugador; // Asigna el prefab del jugador 
     private GameObject jugadorLocal;
-    public GameObject PanelInvitacion;
 
     private string nombreJugador;
 
     public static Socket clienteSocket;
 
     private byte[] buffer;
-
-   private void Start()
+    private void Start()
     {
-        CerrarPanel();
+        
     }
     private void AtenderServidor()
     {
@@ -223,7 +223,7 @@ public class CCliente : MonoBehaviour
                 case 6://invitacion a partida
                     if (codigo==7)
                     {
-                        AbrirPanel();
+                        panelInvitacion1.AbrirPanel();
                         string nombreHost = mensaje.Split('-')[0];
                         textMensaje.text = nombreHost + "te ha invitado a jugar";
                     }
@@ -235,12 +235,12 @@ public class CCliente : MonoBehaviour
                     string respuesta = mensaje.Split('-')[1];
                     if (respuesta == "SI")
                     {
-                        CerrarPanel();
+                        panelInvitacion1.CerrarPanel();
                         SceneManager.LoadScene("Juego"); 
                     }
                     else if (respuesta == "NO")
                     {
-                        CerrarPanel();
+                        panelInvitacion1.CerrarPanel();
                         invitacionAceptadaRechazada.text = "El jugador ha rechazado la invitacion. Vuelve a invitar a alguien para poder jugar.";
                     }
                     break;
@@ -260,7 +260,7 @@ public class CCliente : MonoBehaviour
         Socket servidor = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
         IPAddress direccion = IPAddress.Parse("192.168.56.102");
-        IPEndPoint ip = new IPEndPoint(direccion, 5064);
+        IPEndPoint ip = new IPEndPoint(direccion, 5062);
 
         //Creamos el socket 
 
@@ -285,18 +285,40 @@ public class CCliente : MonoBehaviour
              return;
          }
      }
+    public void Desconectarse()
+    {
+        //Mensaje de desconexión
+        string mensaje = "5";
+
+        byte[] msg = System.Text.Encoding.ASCII.GetBytes(mensaje);
+        servidor.Send(msg);
+
+        // Nos desconectamos
+
+        servidor.Shutdown(SocketShutdown.Both);
+        servidor.Close();
+    }
     public void IniciarSesion()
     {
+        Socket servidor = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
+        IPAddress direccion = IPAddress.Parse("192.168.56.102");
+        IPEndPoint ip = new IPEndPoint(direccion, 5062);
+
         try
         {
+            servidor.Connect(ip);
+
+            Debug.Log("Conectado");
+
             string Name = NameInput.text;
             string Password = PasswordInput.text;
-            string PasswordConfirm = ConfirmPasswordInput.text;
-            string ID = IdInput.text;
 
             string iniciarSesion = "0" + "-" + Name + "-" + Password;
             byte[] mensaje1 = System.Text.Encoding.ASCII.GetBytes(iniciarSesion);
             servidor.Send(mensaje1);
+
+            SceneManager.LoadScene("MenuJuego");
 
             ThreadStart t = delegate { AtenderServidor(); };
             atender = new Thread(t);
@@ -319,7 +341,7 @@ public class CCliente : MonoBehaviour
         Socket servidor = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
         IPAddress direccion = IPAddress.Parse("192.168.56.102");
-        IPEndPoint ip = new IPEndPoint(direccion, 5064);
+        IPEndPoint ip = new IPEndPoint(direccion, 5062);
 
         //Creamos el socket 
         try
@@ -415,15 +437,7 @@ public class CCliente : MonoBehaviour
             return;
         }
     }
-    public void AbrirPanel()
-    {
-        PanelInvitacion.SetActive(true);
 
-    }
-    public void CerrarPanel()
-    {
-        PanelInvitacion.SetActive(false);
-    }
     //invitar
     public void Invitar()
     {
