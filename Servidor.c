@@ -631,6 +631,23 @@ void *atenderCliente(void *socket)
 		else if(codigo==7){//listaConectados
 			
 		}
+		else if(codigo==9){ //reenviar mensaje
+			char mensaje[200];
+			p=strtok(NULL,"/");
+			strcpy(mensaje,p);
+			char usuario[200];
+			p=strtok(NULL,"/");
+			strcpy(usuario,p);
+			pthread_mutex_lock(&mutex);
+			sprintf(respuesta, "9-%s-%s", mensaje, usuario);
+			printf("%s\n", respuesta);
+			int j;
+			for (j = 0; j < lista.num; j++)
+			{
+				write (sockets[j],respuesta,strlen(respuesta));
+			}
+			pthread_mutex_unlock(&mutex);
+		}
 		else if (codigo == 0 || codigo == 1 || codigo == 5)//envia la lista de conectados cada vez que se modifica
 		{
 			pthread_mutex_lock(&mutex);

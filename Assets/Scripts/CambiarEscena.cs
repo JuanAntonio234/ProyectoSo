@@ -5,30 +5,30 @@ public class CambiarEscena : MonoBehaviour
 {
     public void IrAIniciarSesion()
     {
-        SceneManager.LoadScene("IniciarSesion");
+        SceneManager.LoadSceneAsync("IniciarSesión");
     }
     public void IrARegistrarse()
     {
-        SceneManager.LoadScene("Registrarse");
+        SceneManager.LoadSceneAsync("Registrarse");
     }
     public void IrAOpciones()
     {
-        SceneManager.LoadScene("Opciones");
+        SceneManager.LoadSceneAsync("Opciones");
     }
     public void IrAMenu()
     {
-        SceneManager.LoadScene("MenuPrincipal");
+        SceneManager.LoadSceneAsync("MenuPrincipal");
     }
     public void IrAConsulta()
     {
-        SceneManager.LoadScene("Consulta");
+        SceneManager.LoadSceneAsync("Consulta");
     }
     public void IrAMenuJuego()
     {
-        SceneManager.LoadScene("MenuJuego");
+        SceneManager.LoadSceneAsync("MenuJuego");
     }
     public void IrAJuego()
     {
-        SceneManager.LoadScene("Juego");
+        SceneManager.LoadSceneAsync("Juego");
     }
 }

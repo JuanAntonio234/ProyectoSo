@@ -63,6 +63,7 @@ public class CCliente : MonoBehaviour
     public TMP_Text texto;
     public TMP_Text textMensaje;
     public TMP_Text invitacionAceptadaRechazada;
+    public TMP_Text Chat;
 
     private byte[] recibirbuffer = new byte[1024];
 
@@ -72,6 +73,7 @@ public class CCliente : MonoBehaviour
     public TMP_InputField IdInput;
     public TMP_InputField HostInput;
     public TMP_InputField InvitadoInput;
+    public TMP_InputField Mensaje;
 
     public Button Consulta1;
     public Button Consulta2;
@@ -244,6 +246,15 @@ public class CCliente : MonoBehaviour
                         invitacionAceptadaRechazada.text = "El jugador ha rechazado la invitacion. Vuelve a invitar a alguien para poder jugar.";
                     }
                     break;
+                case 8://enviar mensaje
+                    if (codigo == 9)
+                    {
+                        string message = trozos[1];
+                        string usuario = trozos[2];
+
+                        Chat.text = usuario + ": " + message + "\n";
+                    }
+                    break;
                 case -1://desconectar
                     servidor.Shutdown(SocketShutdown.Both);
                     UnityMainThreadDispatcher.Instance().Enqueue(() =>
@@ -330,7 +341,6 @@ public class CCliente : MonoBehaviour
         {
             UnityMainThreadDispatcher.Instance().Enqueue(() =>
             {
-                texto.text = "no se ha podido conectar con el servidor:";
                 Debug.Log("no se ha podido conectar con el servidor:" + e);
             });
             return;
@@ -375,13 +385,22 @@ public class CCliente : MonoBehaviour
         {
             Debug.Log("no se ha podido conectar con el servidor:" + ex);
 
-
-                texto.text = "No se ha podido conectar con el servidor: " + ex.Message;
-                Debug.Log("No se ha podido conectar con el servidor: " + ex.Message);
+            Debug.Log("No se ha podido conectar con el servidor: " + ex.Message);
 
             return;
         }
     }
+
+    public void EnviarMensaje()
+    {
+        string msg = Mensaje.text;
+        string Name = NameInput.text;
+
+        string mensaje = "9" + msg + Name;
+        byte[] mensaje1 = System.Text.Encoding.ASCII.GetBytes(mensaje);
+        servidor.Send(mensaje1);
+    }
+
     ///////////////////////////////////////////////////////////////
 
     // Realizar consulta 1
@@ -442,6 +461,12 @@ public class CCliente : MonoBehaviour
     public void Invitar()
     {
         
+    }
+
+    //cerrar el juego desde el menú
+    public void Cerrar()
+    {
+        Application.Quit();
     }
 
 }
