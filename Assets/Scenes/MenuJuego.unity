@@ -190,8 +190,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4281874488
-  m_fontColor: {r: 0.21960786, g: 0.21960786, b: 0.21960786, a: 1}
+    rgba: 4278190080
+  m_fontColor: {r: 0, g: 0, b: 0, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -1666,6 +1666,7 @@ GameObject:
   - component: {fileID: 852331207}
   - component: {fileID: 852331210}
   - component: {fileID: 852331211}
+  - component: {fileID: 852331212}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -1764,7 +1765,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   panelInvitacion1: {fileID: 0}
-  texto: {fileID: 157323512}
+  texto: {fileID: 0}
   textMensaje: {fileID: 1506933030}
   invitacionAceptadaRechazada: {fileID: 1793577805}
   Chat: {fileID: 157323512}
@@ -1778,6 +1779,19 @@ MonoBehaviour:
   Consulta1: {fileID: 0}
   Consulta2: {fileID: 0}
   Consulta3: {fileID: 0}
+--- !u!114 &852331212
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 852331206}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05e755ec7d06ee541bf18baf0e4e43e8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  invitacion: {fileID: 2070214599}
 --- !u!1 &869946604
 GameObject:
   m_ObjectHideFlags: 0
@@ -1836,7 +1850,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: ' jugador a invitar'
+  m_text: ' Jugador a invitar'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1845,8 +1859,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4281874488
-  m_fontColor: {r: 0.21960786, g: 0.21960786, b: 0.21960786, a: 1}
+    rgba: 4278190080
+  m_fontColor: {r: 0, g: 0, b: 0, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -2351,7 +2365,7 @@ RectTransform:
   m_Children:
   - {fileID: 1861938218}
   m_Father: {fileID: 2070214600}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -2473,7 +2487,7 @@ RectTransform:
   m_Children:
   - {fileID: 1737187209}
   m_Father: {fileID: 1168720716}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -2793,8 +2807,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 852331211}
-        m_TargetAssemblyTypeName: CCliente, Assembly-CSharp
+      - m_Target: {fileID: 852331212}
+        m_TargetAssemblyTypeName: PanelInvitacion, Assembly-CSharp
         m_MethodName: AbrirPanel
         m_Mode: 1
         m_Arguments:
@@ -2937,11 +2951,11 @@ RectTransform:
   m_Children:
   - {fileID: 1426673887}
   - {fileID: 157323511}
-  - {fileID: 2070214600}
-  - {fileID: 1461895763}
-  - {fileID: 1068825714}
   - {fileID: 2081604813}
+  - {fileID: 1068825714}
+  - {fileID: 1461895763}
   - {fileID: 1634440435}
+  - {fileID: 2070214600}
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -3189,7 +3203,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.8392157, g: 0.76862746, b: 0.69411767, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -3463,7 +3477,7 @@ RectTransform:
   m_Children:
   - {fileID: 1340995755}
   m_Father: {fileID: 1168720716}
-  m_RootOrder: 3
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -3950,7 +3964,7 @@ RectTransform:
   m_Children:
   - {fileID: 1070566298}
   m_Father: {fileID: 2070214600}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -4204,7 +4218,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1168720716}
-  m_RootOrder: 6
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -4942,7 +4956,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Enter text...
+  m_text: Introduce mensaje...
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -5050,8 +5064,8 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1350594498}
-  - {fileID: 951332876}
   - {fileID: 1582548409}
+  - {fileID: 951332876}
   - {fileID: 1506933029}
   - {fileID: 29764593}
   - {fileID: 869946605}
@@ -5059,7 +5073,7 @@ RectTransform:
   - {fileID: 77258771}
   - {fileID: 602206887}
   m_Father: {fileID: 1168720716}
-  m_RootOrder: 2
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -5135,7 +5149,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1168720716}
-  m_RootOrder: 5
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}

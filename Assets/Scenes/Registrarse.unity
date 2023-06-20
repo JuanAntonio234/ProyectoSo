@@ -2203,6 +2203,7 @@ MonoBehaviour:
   textMensaje: {fileID: 0}
   invitacionAceptadaRechazada: {fileID: 0}
   Chat: {fileID: 0}
+  RespuestaConsultas: {fileID: 0}
   NameInput: {fileID: 2116111444}
   PasswordInput: {fileID: 1276312797}
   ConfirmPasswordInput: {fileID: 180987670}
@@ -2210,68 +2211,10 @@ MonoBehaviour:
   HostInput: {fileID: 0}
   InvitadoInput: {fileID: 0}
   Mensaje: {fileID: 0}
+  NombreJugadorInputField: {fileID: 0}
   Consulta1: {fileID: 0}
   Consulta2: {fileID: 0}
   Consulta3: {fileID: 0}
---- !u!1 &1037369428
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1037369430}
-  - component: {fileID: 1037369429}
-  m_Layer: 0
-  m_Name: GameManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1037369429
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1037369428}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: baed5d2d945fba44e901320d23bae592, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  panelInvitacion1: {fileID: 0}
-  texto: {fileID: 0}
-  textMensaje: {fileID: 0}
-  invitacionAceptadaRechazada: {fileID: 0}
-  Chat: {fileID: 0}
-  NameInput: {fileID: 0}
-  PasswordInput: {fileID: 0}
-  ConfirmPasswordInput: {fileID: 0}
-  IdInput: {fileID: 0}
-  HostInput: {fileID: 0}
-  InvitadoInput: {fileID: 0}
-  Mensaje: {fileID: 0}
-  Consulta1: {fileID: 0}
-  Consulta2: {fileID: 0}
-  Consulta3: {fileID: 0}
---- !u!4 &1037369430
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1037369428}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 361.62158, y: 157.08551, z: -3.2949414}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1143729080
 GameObject:
   m_ObjectHideFlags: 0
@@ -2592,7 +2535,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 31.1
+  m_fontSize: 24.8
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
