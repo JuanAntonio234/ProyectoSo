@@ -3,7 +3,11 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - trampa
+  - decoracion fondo
+  - player
+  - checkpoint
   layers:
   - Default
   - TransparentFX
@@ -40,6 +44,9 @@ TagManager:
   m_SortingLayers:
   - name: Background
     uniqueID: 3530720517
+    locked: 0
+  - name: Decoracion fondo
+    uniqueID: 2786109333
     locked: 0
   - name: Terrain
     uniqueID: 1394503701

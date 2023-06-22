@@ -29,6 +29,10 @@ public class CambiarEscena : MonoBehaviour
     }
     public void IrAJuego()
     {
-        SceneManager.LoadSceneAsync("Juego");
+        SceneManager.LoadSceneAsync("Gameplay");
+    }
+    public void IrAJuegoCompletado()
+    {
+        SceneManager.LoadSceneAsync("JuegoCompletado");
     }
 }

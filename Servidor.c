@@ -98,7 +98,7 @@ int Desconectar(ListaConectados *lista, char nombre[20])//desconecta de la lista
 	}
 }
 
-int Conectar(ListaConectados *lista, char nombre[20], int socket)//aￃﾯￂ﾿ￂﾱade a la lista de conectados al usuario
+int Conectar(ListaConectados *lista, char nombre[20], int socket)//aï¿±ade a la lista de conectados al usuario
 {
 	if (lista->num == 100)
 		return -1;
@@ -125,21 +125,6 @@ void Login(char nombre[25], char contrasena[25], char respuesta[512])
 	
 	int login;
 	char consulta[500];
-	
-	conn = mysql_init(NULL);
-	if (conn==NULL) {
-		printf ("Error al crear la conexion1: %u %s\n",
-				mysql_errno(conn), mysql_error(conn));
-		exit (1);
-	}
-	
-	conn = mysql_real_connect (conn, "shiva2.upc.es","root", "M6_BBDD", NULL, 0, NULL, 0);
-	if (conn==NULL)
-	{
-		printf ("Error al inicializar la conexion2: %u %s\n",
-				mysql_errno(conn), mysql_error(conn));
-		exit (1);
-	}
 	
 	err=mysql_query(conn, "use M6_BBDD;");
 	if (err!=0)
@@ -187,21 +172,6 @@ int verificarID(MYSQL *conn, int id){
 	MYSQL_ROW row;
 	int numFilas=0;
 	
-	conn = mysql_init(NULL);
-	if (conn==NULL) {
-		printf ("Error al crear la conexion1: %u %s\n",
-				mysql_errno(conn), mysql_error(conn));
-		exit (1);
-	}
-	
-	conn = mysql_real_connect (conn, "shiva2.upc.es","root", "M6_BBDD", NULL, 0, NULL, 0);
-	if (conn==NULL)
-	{
-		printf ("Error al inicializar la conexion2: %u %s\n",
-				mysql_errno(conn), mysql_error(conn));
-		exit (1);
-	}
-	
 	sprintf(consulta, "SELECT COUNT(ID) FROM JUGADOR WHERE ID = %d;",id);
 	if(mysql_query(conn,consulta)!=0){
 		printf("Error al consultar los datos de la base de datos: %u %s\n",
@@ -226,21 +196,6 @@ void Registrar(int id,char nombre[25], char contrasena[25], char respuesta[512])
 {
 	char consulta[500];
 	int numJ;
-	
-	conn = mysql_init(NULL);
-	if (conn==NULL) {
-		printf ("Error al crear la conexion1: %u %s\n",
-				mysql_errno(conn), mysql_error(conn));
-		exit (1);
-	}
-	
-	conn = mysql_real_connect (conn, "shiva2.upc.es","root", "M6_BBDD", NULL, 0, NULL, 0);
-	if (conn==NULL)
-	{
-		printf ("Error al inicializar la conexion2: %u %s\n",
-				mysql_errno(conn), mysql_error(conn));
-		exit (1);
-	}
 	
 	err=mysql_query(conn, "use M6_BBDD;");
 	if (err!=0)
@@ -296,21 +251,6 @@ void JugadoresBaseDeDatos(char respuesta[512])
 	char nombres[50]="";
 	char consulta[500];
 	
-	conn = mysql_init(NULL);
-	if (conn==NULL) {
-		printf ("Error al crear la conexion1: %u %s\n",
-				mysql_errno(conn), mysql_error(conn));
-		exit (1);
-	}
-	
-	conn = mysql_real_connect (conn, "shiva2.upc.es","root", "M6_BBDD", NULL, 0, NULL, 0);
-	if (conn==NULL)
-	{
-		printf ("Error al inicializar la conexion2: %u %s\n",
-				mysql_errno(conn), mysql_error(conn));
-		exit (1);
-	}
-	
 	err=mysql_query(conn, "use M6_BBDD;");
 	if (err!=0)
 	{
@@ -354,21 +294,26 @@ void JugadoresBaseDeDatos(char respuesta[512])
 }
 
 void PartidasGanadasPere(char respuesta[512])
-{	
+{
+	MYSQL *conn;
+	int err;
+	MYSQL_RES *resultado;
+	MYSQL_ROW row;
+	
 	char pganadas[10];
 	char consulta[500];
 	
 	conn = mysql_init(NULL);
 	if (conn==NULL) {
-		printf ("Error al crear la conexion1: %u %s\n",
+		printf ("Error al crear la conexion: %u %s\n",
 				mysql_errno(conn), mysql_error(conn));
 		exit (1);
 	}
 	
-	conn = mysql_real_connect (conn, "shiva2.upc.es","root", "M6_BBDD", NULL, 0, NULL, 0);
+	conn = mysql_real_connect (conn, "localhost","root", "mysql", NULL, 0, NULL, 0);
 	if (conn==NULL)
 	{
-		printf ("Error al inicializar la conexion2: %u %s\n",
+		printf ("Error al inicializar la conexion7: %u %s\n",
 				mysql_errno(conn), mysql_error(conn));
 		exit (1);
 	}
@@ -402,21 +347,6 @@ void DameID(char nombre[50], char respuesta[512])
 {
 	char ID[10];
 	char consulta[500];
-	
-	conn = mysql_init(NULL);
-	if (conn==NULL) {
-		printf ("Error al crear la conexion1: %u %s\n",
-				mysql_errno(conn), mysql_error(conn));
-		exit (1);
-	}
-	
-	conn = mysql_real_connect (conn, "shiva2.upc.es","root", "M6_BBDD", NULL, 0, NULL, 0);
-	if (conn==NULL)
-	{
-		printf ("Error al inicializar la conexion2: %u %s\n",
-				mysql_errno(conn), mysql_error(conn));
-		exit (1);
-	}
 	
 	err=mysql_query(conn, "use M6_BBDD;");
 	if (err!=0)
@@ -510,7 +440,7 @@ void *atenderCliente(void *socket)
 			strcpy(nombre, p);
 			p = strtok(NULL, "-");
 			strcpy(contrasena, p);
-			printf("Codigo: %d, Nombre: %s y Contraseￃﾯￂ﾿ￂﾱa: %s\n",codigo, nombre, contrasena);
+			printf("Codigo: %d, Nombre: %s y Contraseï¿±a: %s\n",codigo, nombre, contrasena);
 			Login(nombre, contrasena, contestacion);
 			pthread_mutex_lock(&mutex);
 			if(strcmp (contestacion, "Error") != 0)
@@ -532,7 +462,7 @@ void *atenderCliente(void *socket)
 			p = strtok(NULL, "-");
 			printf("%s\n", p);
 			strcpy(contrasena, p);
-			printf("Codigo: %d, Nombre: %s y Contraseￃﾯￂ﾿ￂﾱa: %s\n", codigo, nombre, contrasena);
+			printf("Codigo: %d, Nombre: %s y Contraseï¿±a: %s\n", codigo, nombre, contrasena);
 			Registrar(id,nombre, contrasena, contestacion);
 			pthread_mutex_lock(&mutex);
 			if(strcmp (contestacion, "Error") != 0)
@@ -614,10 +544,10 @@ void *atenderCliente(void *socket)
 		}
 		else if(codigo==9){ //reenviar mensaje
 			char mensaje[200];
-			p=strtok(NULL,"-");
+			p=strtok(NULL,"/");
 			strcpy(mensaje,p);
 			char usuario[200];
-			p=strtok(NULL,"-");
+			p=strtok(NULL,"/");
 			strcpy(usuario,p);
 			pthread_mutex_lock(&mutex);
 			sprintf(respuesta, "9-%s-%s", mensaje, usuario);
@@ -628,24 +558,6 @@ void *atenderCliente(void *socket)
 				write (sockets[j],respuesta,strlen(respuesta));
 			}
 			pthread_mutex_unlock(&mutex);
-		}
-		
-		else if (codigo==11) //reenviar invitaci￳n
-		{
-			char host[200];
-			p=strtok(NULL,"-");
-			strcpy(host,p);
-			char invitado[200];
-			p=strtok(NULL,"-");
-			strcpy(invitado,p);
-			printf("Jugador %s invita a %s", host, invitado);
-			sprintf(respuesta, "7-%s", host);
-			
-			int j;
-			for (j = 0; j < lista.num; j++)
-			{
-				if (
-			}
 		}
 		else if (codigo == 0 || codigo == 1 || codigo == 5)//envia la lista de conectados cada vez que se modifica
 		{
@@ -667,14 +579,29 @@ void *atenderCliente(void *socket)
 }
 
 int main(int argc, char *argv[])
-{	
+{
+	conn = mysql_init(NULL);
+	if (conn==NULL) {
+		printf ("Error al crear la conexion1: %u %s\n",
+				mysql_errno(conn), mysql_error(conn));
+		exit (1);
+	}
+	
+	conn = mysql_real_connect (conn, "shiva2.upc.es","root", "M6_BBDD", NULL, 0, NULL, 0);
+	if (conn==NULL)
+	{
+		printf ("Error al inicializar la conexion2: %u %s\n",
+				mysql_errno(conn), mysql_error(conn));
+		exit (1);
+	}
+	
 	int sock_conn, sock_listen;
 	struct sockaddr_in serv_adr;
 	
 	pthread_t thread;
 	lista.num = 0;
 	int conexion = 0;
-	int puerto = 50016;
+	int puerto = 5016;
 	int i = 0;
 	
 	//abrimos el socket

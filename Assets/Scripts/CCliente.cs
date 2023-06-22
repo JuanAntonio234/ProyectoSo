@@ -14,7 +14,7 @@ public class CCliente : MonoBehaviour
     Socket servidor;
     Thread atender;
 
-    int puerto = 50016;
+    int puerto = 5062;
 
     public PanelInvitacion panelInvitacion1;
 
@@ -168,22 +168,38 @@ public class CCliente : MonoBehaviour
                         textMensaje.text = nombreHost + "te ha invitado a jugar";
                     }
                     break;
-                case 7: //respuesta invitacion a partida
-                    string host = trozos[1];
-                    string respuesta = trozos[2];
-                    if (respuesta == "SI")
+                case 7: //respuesta invitacion a partida siendo el host
+                    if (mensaje == "8")
                     {
-                        panelInvitacion1.CerrarPanel();
-                        SceneManager.LoadScene("Juego");
-                    }
-                    else if (respuesta == "NO")
-                    {
-                        panelInvitacion1.CerrarPanel();
-                        invitacionAceptadaRechazada.text = "El jugador ha rechazado la invitacion. Vuelve a invitar a alguien para poder jugar.";
+                        string respuesta = trozos[1];
+                        int idP = Convert.ToInt32(trozos[2]);
+                        if (respuesta == "SI")
+                        {
+                            invitacionAceptadaRechazada.text = "El jugador ha aceptado la invitacion.";
+                            panelInvitacion1.CerrarPanel();
+                            SceneManager.LoadScene("Gameplay");
+                        }
+                        else if (respuesta == "NO")
+                        {
+                            panelInvitacion1.CerrarPanel();
+                            invitacionAceptadaRechazada.text = "El jugador ha rechazado la invitacion. Vuelve a invitar a alguien para poder jugar.";
+                        }
                     }
                     break;
-                case 8: //recibir mensaje
+                case 8: //respuesta invitacion en caso de ser el invitado
                     if (mensaje == "9")
+                    {
+                        string respuesta = trozos[1];
+                        int idP2 = Convert.ToInt32(trozos[2]);
+                        if (respuesta == "SI")
+                        {
+                            SceneManager.LoadScene("Gameplay");
+                        }
+
+                    }
+                    break;
+                case 9: //recibir mensaje
+                    if (mensaje == "10")
                     {
                         string message = trozos[1];
                         string usuario = trozos[2];
@@ -206,7 +222,7 @@ public class CCliente : MonoBehaviour
     {
         Socket servidor = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-        IPAddress direccion = IPAddress.Parse("147.83.117.22");
+        IPAddress direccion = IPAddress.Parse("127.0.0.1");
         IPEndPoint ip = new IPEndPoint(direccion, puerto);
 
         //Creamos el socket 
@@ -223,7 +239,7 @@ public class CCliente : MonoBehaviour
         catch (SocketException ex)
         {
 
-            Debug.Log("no se ha podido conectar con el servidor:" + ex);
+            Debug.Log("No se ha podido conectar con el servidor:" + ex);
             return;
         }
     }
@@ -246,7 +262,7 @@ public class CCliente : MonoBehaviour
     {
         Socket servidor = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-        IPAddress direccion = IPAddress.Parse("147.83.117.22");
+        IPAddress direccion = IPAddress.Parse("127.0.0.1");
         IPEndPoint ip = new IPEndPoint(direccion, puerto);
 
         try
@@ -314,20 +330,12 @@ public class CCliente : MonoBehaviour
 
     public void EnviarMensaje() //procedimiento para enviar un mensaje del chat al servidor
     {
-        try
-        {
             string msg = Mensaje.text;
             string Name = NameInput.text;
 
             string mensaje = "9-" + msg + "-" + Name;
             byte[] mensaje1 = System.Text.Encoding.ASCII.GetBytes(mensaje);
             servidor.Send(mensaje1);
-        }
-        catch (SocketException ex)
-        {
-            Debug.Log("No se ha podido conectar con el servidor:" + ex);
-            return;
-        }
     }
 
     // Realizar consulta 1
@@ -384,20 +392,32 @@ public class CCliente : MonoBehaviour
     //invitar
     public void Invitar()
     {
-        try
-        {
-            string host = HostInput.text;
             string invitado = InvitadoInput.text;
 
-            string invitar = "11-" + host + "-" + invitado;
+            string invitar = "11-" + invitado;
             byte[] mensaje = System.Text.Encoding.ASCII.GetBytes(invitar);
             servidor.Send(mensaje);
-        }
-        catch (SocketException ex)
-        {
-            Debug.Log("No se ha podido conectar con el servidor: " + ex);
-            return;
-        }
+    }
+
+    //aceptar invitacion
+    public void AceptaInvitacion()
+    {
+        string host = NameInput.text;
+
+        string mensaje = "12-" + host + "-SI";
+        byte[] msg = System.Text.Encoding.ASCII.GetBytes(mensaje);
+        servidor.Send(msg);
+        panelInvitacion1.CerrarPanel();
+    }
+    //denegar invitacion
+    public void RechazarPartida()
+    {
+        string host = NameInput.text;
+
+        string mensaje = "12-" + host + "-NO";
+        byte[] msg = System.Text.Encoding.ASCII.GetBytes(mensaje);
+        servidor.Send(msg);
+        panelInvitacion1.CerrarPanel();
     }
 
     //cerrar el juego desde el menú
