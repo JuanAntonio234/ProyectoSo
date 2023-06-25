@@ -1,5 +1,5 @@
-using UnityEngine.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class CambiarEscena : MonoBehaviour
 {

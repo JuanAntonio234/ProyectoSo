@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PanelInvitacion : MonoBehaviour
@@ -14,7 +12,7 @@ public class PanelInvitacion : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
     public void AbrirPanel()
     {

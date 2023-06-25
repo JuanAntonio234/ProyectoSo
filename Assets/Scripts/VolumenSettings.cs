@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.UI;
@@ -26,7 +24,7 @@ public class VolumenSettings : MonoBehaviour
     public void SetMusicVolumen()
     {
         float volumen = musicSlider.value;
-        myMixer.SetFloat("musica", Mathf.Log10(volumen)*20);
+        myMixer.SetFloat("musica", Mathf.Log10(volumen) * 20);
         PlayerPrefs.SetFloat("musicVolumen", volumen);
     }
 

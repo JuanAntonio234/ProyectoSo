@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class WaypointFollower : MonoBehaviour
@@ -15,7 +13,7 @@ public class WaypointFollower : MonoBehaviour
         if (Vector2.Distance(waypoints[currentWaypointIndex].transform.position, transform.position) < .1f)
         {
             currentWaypointIndex++;
-            if(currentWaypointIndex >= waypoints.Length)
+            if (currentWaypointIndex >= waypoints.Length)
             {
                 currentWaypointIndex = 0;
             }

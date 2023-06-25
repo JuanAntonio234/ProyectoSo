@@ -1,7 +1,3 @@
- using System.Collections;
-using System.Collections.Generic;
-using System.Drawing.Text;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,7 +13,7 @@ public class CuadroTexto : MonoBehaviour
     }
     public void CerrarCuadroTexto()
     {
-        nombreJugador = cuadroTexto.GetComponent < InputField> ().text;
+        nombreJugador = cuadroTexto.GetComponent<InputField>().text;
         cuadroTexto.SetActive(false);
     }
 

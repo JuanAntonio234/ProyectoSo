@@ -1,9 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using System.Net.Sockets;
-using System.Net.WebSockets;
-using System.Text;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -14,7 +9,7 @@ public class PlayerMovement : MonoBehaviour
     private BoxCollider2D coll;
 
     [SerializeField] private LayerMask jumpableGround;
-    private enum MovementState { idle, running, jumping, falling}
+    private enum MovementState { idle, running, jumping, falling }
 
     [SerializeField] private AudioSource JUMPSoundEffect;
 
@@ -66,12 +61,12 @@ public class PlayerMovement : MonoBehaviour
             state = MovementState.idle;
         }
 
-        if (rb.velocity.y  > .1f)
+        if (rb.velocity.y > .1f)
         {
             state = MovementState.jumping;
         }
 
-        if (rb.velocity.y  < -.1f)
+        if (rb.velocity.y < -.1f)
         {
             state = MovementState.falling;
         }

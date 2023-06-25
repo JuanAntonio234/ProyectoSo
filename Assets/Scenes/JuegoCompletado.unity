@@ -233,23 +233,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: baed5d2d945fba44e901320d23bae592, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  panelInvitacion1: {fileID: 0}
   texto: {fileID: 0}
-  textMensaje: {fileID: 0}
-  invitacionAceptadaRechazada: {fileID: 0}
-  Chat: {fileID: 0}
-  RespuestaConsultas: {fileID: 0}
   NameInput: {fileID: 0}
   PasswordInput: {fileID: 0}
   ConfirmPasswordInput: {fileID: 0}
-  IdInput: {fileID: 0}
-  HostInput: {fileID: 0}
-  InvitadoInput: {fileID: 0}
-  Mensaje: {fileID: 0}
-  NombreJugadorInputField: {fileID: 0}
   Consulta1: {fileID: 0}
   Consulta2: {fileID: 0}
   Consulta3: {fileID: 0}
+  NombreJugadorInputField: {fileID: 0}
+  RespuestaConsultas: {fileID: 0}
+  panelInvitacion1: {fileID: 0}
+  textMensaje: {fileID: 0}
+  invitacionAceptadaRechazada: {fileID: 0}
+  HostInput: {fileID: 0}
+  InvitadoInput: {fileID: 0}
+  Chat: {fileID: 0}
+  MensajeInputChat: {fileID: 0}
 --- !u!1 &1078808212
 GameObject:
   m_ObjectHideFlags: 0
@@ -339,7 +338,7 @@ GameObject:
   - component: {fileID: 1105851192}
   - component: {fileID: 1105851191}
   m_Layer: 5
-  m_Name: Rechazar
+  m_Name: VolverAlMenu
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

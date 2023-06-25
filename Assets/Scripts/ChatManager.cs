@@ -1,42 +1,18 @@
-using System;
-using System.Collections.Generic;
-using System.Net.Sockets;
-using System.Text;
+using Client;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class ChatManager : MonoBehaviour
-{
+{/*
     public TMP_InputField messageInput;
     public TMP_Text chatText;
     public string IP = "192.168.56.102";
-    public int puerto= 5052;
+    public int puerto = 5052;
 
     private Socket clientSocket;
     private byte[] receiveBuffer = new byte[1024];
     private List<string> chatMessages = new List<string>();
 
-    private void Start()
-    {
-        ConectarServidor();
-    }
-
-    private void ConectarServidor()
-    {
-        clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
-        try
-        {
-            clientSocket.Connect(IP, puerto);
-            Debug.Log("conectado al server");
-            RecibirMensaje();
-        }
-        catch (SocketException ex)
-        {
-            Debug.Log("fallo al conectarse al server: " + ex.Message);
-        }
-    }
 
     private void RecibirMensaje()
     {
@@ -68,16 +44,7 @@ public class ChatManager : MonoBehaviour
         clientSocket.Send(sendBuffer);
     }
 
-    public void EnviarMensajeChat()
-    {
-        string message = messageInput.text;
 
-        if (!string.IsNullOrEmpty(message))
-        {
-            EnviarMensajeServidor(message);
-            messageInput.text = string.Empty;
-        }
-    }
 
     private void AñadirMensajeCHat(string message)
     {
@@ -87,12 +54,58 @@ public class ChatManager : MonoBehaviour
 
     private void ActualizarMensajeChat()
     {
-        chatText.text = string.Join("\n", chatMessages);
+        textoChat.text = string.Join("\n", chatMessages);
     }
 
     private void OnDestroy()
     {
         if (clientSocket != null && clientSocket.Connected)
             clientSocket.Close();
+    }*/
+
+
+    private ConexionServidor conexionServidor;
+
+
+    TMP_Text textoChat;
+    TMP_InputField mensajeInputChat;
+    public TMP_InputField nameChat;
+
+
+    private void Start()
+    {
+        textoChat = GameObject.Find("Chat").GetComponent<TMP_Text>();
+        mensajeInputChat = GameObject.Find("MensajeInputChat").GetComponent<TMP_InputField>();
+
+        // Inicializar la instancia de ConexionServidor
+        conexionServidor = ConexionServidor.GetInstance();
+    }
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Return))
+        {
+            if (mensajeInputChat.text != "")
+            {
+                string mensajeChat = mensajeInputChat.text;
+                Debug.Log(mensajeChat);
+                string name = nameChat.text;
+                Debug.Log(name);
+
+                mensajeInputChat.text = "";
+                nameChat.text = "";
+                string mensaje = "9-" + mensajeChat + "-" + name;
+                EnviarMensajeChat(mensaje);
+                ActualizarMensajeChat(name,mensajeChat);
+            }
+        }
+    }
+    public void EnviarMensajeChat(string mensajeChat)
+    {
+        Debug.Log(mensajeChat);
+        conexionServidor.EnviarMensajeServidor(mensajeChat);
+    }
+    public void ActualizarMensajeChat(string nombre,string mensaje)
+    {
+        textoChat.text += ">>" + nombre +"-"+mensaje+ "\n";
     }
 }

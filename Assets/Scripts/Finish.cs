@@ -1,7 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Finish : MonoBehaviour
 {
@@ -9,7 +7,7 @@ public class Finish : MonoBehaviour
 
     private bool final = false;
 
-    private void Start() 
+    private void Start()
     {
         ENDSoundEffect = GetComponent<AudioSource>();
     }
@@ -22,8 +20,8 @@ public class Finish : MonoBehaviour
             ENDSoundEffect.Play();
             final = true;
             Invoke("Final", 2f);
-            
-            
+
+
         }
     }
 

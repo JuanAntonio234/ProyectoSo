@@ -181,7 +181,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Id del jugador '
+  m_text: Partidas ganadas
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -378,7 +378,6 @@ MonoBehaviour:
   NameInput: {fileID: 0}
   PasswordInput: {fileID: 0}
   ConfirmPasswordInput: {fileID: 0}
-  IdInput: {fileID: 0}
   HostInput: {fileID: 0}
   InvitadoInput: {fileID: 0}
   Mensaje: {fileID: 0}
@@ -1380,7 +1379,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.000012159, y: 0.000005722}
+  m_AnchoredPosition: {x: -0.000012159, y: -9}
   m_SizeDelta: {x: 880.4, y: 414.8}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1557935977
@@ -2040,7 +2039,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 49.05
+  m_fontSize: 18
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -2127,7 +2126,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 315.2057, y: 149.80087}
+  m_AnchoredPosition: {x: 277.5, y: 121.19}
   m_SizeDelta: {x: 200.4317, y: 50.9237}
   m_Pivot: {x: 0.49999994, y: 0.5}
 --- !u!114 &1778285960
