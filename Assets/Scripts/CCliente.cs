@@ -1,6 +1,7 @@
 using Client;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
@@ -9,8 +10,8 @@ using UnityEngine.UI;
 
 public class CCliente : MonoBehaviour
 {
-    //mensajes de error
-    public TMP_Text texto;
+    //mensajes
+    public TextMeshProUGUI text1;
 
     //variables para registrarse/loguearse
     public TMP_InputField NameInput;
@@ -18,24 +19,18 @@ public class CCliente : MonoBehaviour
     public TMP_InputField ConfirmPasswordInput;
 
     //variables para las consultas
-    public Button Consulta1;
-    public Button Consulta2;
-    public Button Consulta3;
     public TMP_InputField NombreJugadorInputField;
-    public TMP_Text RespuestaConsultas;
 
     //varible para mostrar el panel usado para la funcion invitiacion
     public PanelInvitacion panelInvitacion1;
 
     //variables para la funcion invitacion
-    public TMP_Text textMensaje;
-    public TMP_Text invitacionAceptadaRechazada;
+    public TextMeshProUGUI textMensaje;
     public TMP_InputField HostInput;
     public TMP_InputField InvitadoInput;
 
     //variables para el chat
-    public TMP_Text Chat;
-    public TMP_InputField nameChat;
+    public TextMeshProUGUI Chat;
     public TMP_InputField MensajeInputChat;
 
     private ConexionServidor conexionServidor;
@@ -72,17 +67,18 @@ public class CCliente : MonoBehaviour
            chatManager = GetComponent<ChatManager>();
 
         //continua con el resto del codigo
-        await AtenderServidor();
+       await AtenderServidor();
     }
 
     private async Task AtenderServidor()
     {
         while (true)
         {
-            string respuestaServidor = await Task.Run(() => conexionServidor.EscucharMensaje());
-
+            string respuestaServidor = await Task.Run(()=>conexionServidor.EscucharMensaje());
+          
             //codigo para separar el mensaje recibido del servidor
             string[] trozos = respuestaServidor.Split('-');
+          
             int codigo = Convert.ToInt32(trozos[0]);
             string mensaje = trozos[1];
             Debug.Log(codigo);
@@ -102,8 +98,8 @@ public class CCliente : MonoBehaviour
                     }
                     else if (mensaje == "Error")
                     {
-                        Debug.Log("hola");
-                        texto.text = "Error: "+trozos[2];
+                        Debug.Log(trozos[2]);
+                        text1.text = "Error: " + trozos[2]; 
                     }
                     break;
                 case 1: //registrar
@@ -114,19 +110,23 @@ public class CCliente : MonoBehaviour
                     }
                     else if (mensaje == "Error")
                     {
-                        texto.text = "Error: " + trozos[2];
+                        text1.text = "Error: " + trozos[2];
                         Debug.Log("Problema al crear al usuario");
                     }
                     break;
                 case 2://consulta Partidas ganadas del jugador Pere
                     if (mensaje == "SI")
                     {
-                        string partidasGanadas = trozos[2];
-                        RespuestaConsultas.text = "Las partidas ganadas del jugador llamado Pere son: " + partidasGanadas;
+                        int partidasGanadas = Convert.ToInt32(trozos[2]);
+                        Debug.Log("Partidas ganadas: " + partidasGanadas);
+                        text1 = GameObject.Find("Respuestas").GetComponent<TextMeshProUGUI>();
+
+                        text1.text = "Las partidas ganadas del jugador llamado Pere son: " + trozos[2];
                     }
                     else if (mensaje == "Error")
                     {
-                        RespuestaConsultas.text = "Error";
+                        text1 = GameObject.Find("Respuestas").GetComponent<TextMeshProUGUI>();
+                        text1.text = "Error";
                         Debug.Log("No se encuentran datos que coincidan");
                     }
                     break;
@@ -145,13 +145,13 @@ public class CCliente : MonoBehaviour
                         {
                             STRjugadoresTotales += jugador + ", ";
                         }
-
-                        RespuestaConsultas.text = "Jugadores totales: " + STRjugadoresTotales;
+                        text1 = GameObject.Find("Respuestas").GetComponent<TextMeshProUGUI>();
+                        text1.text = "Jugadores totales: " + STRjugadoresTotales;
                     }
                     else if (mensaje == "Error")
                     {
-
-                        RespuestaConsultas.text = "No se encuentran datos que coincidan";
+                        text1 = GameObject.Find("Respuestas").GetComponent<TextMeshProUGUI>();
+                        text1.text = "No se encuentran datos que coincidan";
                         Debug.Log("No se encuentran datos que coincidan");
                     }
                     break;
@@ -159,13 +159,14 @@ public class CCliente : MonoBehaviour
                     if (mensaje == "SI")
                     {
                         int partidasGanadas = Convert.ToInt32(trozos[2]);
-
-                        RespuestaConsultas.text = "La ID del jugador es: " + partidasGanadas;
+                        text1 = GameObject.Find("Respuestas").GetComponent<TextMeshProUGUI>();
+                        text1.text = "La ID del jugador es: " + partidasGanadas;
                     }
                     else if (mensaje == "Error")
                     {
 
-                        RespuestaConsultas.text = "No se encuentran datos que coincidan";
+                        text1.text = "No se encuentran datos que coincidan";
+                        text1 = GameObject.Find("Respuestas").GetComponent<TextMeshProUGUI>();
                         Debug.Log("No se encuentran datos que coincidan");
                     }
                     break;
@@ -184,8 +185,7 @@ public class CCliente : MonoBehaviour
                         {
                             jugadoresConectadosStr += jugador + ", ";
                         }
-
-                        texto.text = "Jugadores conectados: " + jugadoresConectadosStr;
+                        text1.text = "Jugadores conectados: " + jugadoresConectadosStr;
                     }
                     break;
                 case 7: //invitacion a partida
@@ -201,14 +201,14 @@ public class CCliente : MonoBehaviour
                     int idP = Convert.ToInt32(trozos[2]);
                     if (respuesta == "SI")
                     {
-                        invitacionAceptadaRechazada.text = "El jugador ha aceptado la invitacion.";
+                        text1.text = "El jugador ha aceptado la invitacion.";
                         panelInvitacion1.CerrarPanel();
                         SceneManager.LoadScene("Gameplay");
                     }
                     else if (respuesta == "NO")
                     {
                         panelInvitacion1.CerrarPanel();
-                        invitacionAceptadaRechazada.text = "El jugador ha rechazado la invitacion. Vuelve a invitar a alguien para poder jugar.";
+                        text1.text = "El jugador ha rechazado la invitacion. Vuelve a invitar a alguien para poder jugar.";
                     }
                     break;
                 /* case 9: //respuesta invitacion en caso de ser el invitado
@@ -271,7 +271,7 @@ public class CCliente : MonoBehaviour
         }
         else if (PasswordInput.text != ConfirmPasswordInput.text)
         {
-            texto.text = "Las contraseñas no coinciden";
+            text1.text = "Las contraseñas no coinciden";
             Debug.Log("Las contraseñas no coinciden");
         }
     }

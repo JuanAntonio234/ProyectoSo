@@ -14,7 +14,7 @@ namespace Client
         private bool connected = false;
         private bool loggedIn = false;
         private static ConexionServidor instance = null;
-        public int puerto = 5054;
+        public int puerto = 5070;
 
 
         // Constructor privado para evitar que se instancie directamente

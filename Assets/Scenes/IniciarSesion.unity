@@ -1532,7 +1532,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: baed5d2d945fba44e901320d23bae592, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  texto: {fileID: 1889582603}
+  text1: {fileID: 1889582603}
   NameInput: {fileID: 2118989403}
   PasswordInput: {fileID: 596674132}
   ConfirmPasswordInput: {fileID: 0}
@@ -1540,7 +1540,6 @@ MonoBehaviour:
   Consulta2: {fileID: 0}
   Consulta3: {fileID: 0}
   NombreJugadorInputField: {fileID: 0}
-  RespuestaConsultas: {fileID: 0}
   panelInvitacion1: {fileID: 0}
   textMensaje: {fileID: 0}
   invitacionAceptadaRechazada: {fileID: 0}

@@ -287,13 +287,7 @@ void JugadoresBaseDeDatos(char respuesta[512])
 
 void PartidasGanadasPere(char respuesta[512])
 {
-	MYSQL *conn;
-	int err;
-	// Estructura especial para almacenar resultados de consultas
-	MYSQL_RES *resultado;
-	MYSQL_ROW row;
-	
-	char pganadas[10];
+	int pganadas;
 	char consulta[500];
 	
 	conn = mysql_init(NULL);
@@ -311,23 +305,23 @@ void PartidasGanadasPere(char respuesta[512])
 		exit (1);
 	}
 	
-	strcpy (consulta,"SELECT PARTIDAS_GANADAS FROM JUGADOR WHERE NOMBRE = 'Pere'");
+	sprintf(consulta,"SELECT PARTIDAS_GANADAS FROM JUGADOR WHERE NOMBRE = 'Pere'");
 	err=mysql_query (conn, consulta);
 	
 	resultado = mysql_store_result (conn);
 	row = mysql_fetch_row (resultado);
-	if (row == NULL || atoi(row[0]) == 0)
+	if (row == NULL || row[0] == NULL)
 	{
 		printf ("No se han obtenido datos en la consulta\n");
 		sprintf(respuesta, "2-Error");
 	}
 	else
 	{
-		strcpy (pganadas, atoi(row[0]));
-		sprintf(respuesta, "2-SI-%s", pganadas);
+		pganadas=atoi(row[0]);
+
+		sprintf(respuesta, "2-SI-%d", pganadas);
 	}
 	mysql_close (conn);
-	exit(0);
 }
 
 void DamePartidasGanadasJugador(char nombre[50], char respuesta[512])
@@ -529,14 +523,12 @@ void* atenderCliente(void* socket)
 		}
 		else if(codigo == 2)//partidas ganadas Pere
 		{
-			p = strtok(NULL, "-");
-			if(p != NULL){
-			strcpy(consultas, p);
-			printf("Codigo: %d, Partidas ganadas: %s\n", codigo, consultas);
+
 			PartidasGanadasPere(contestacion);
+			printf("Codigo: %d, %s\n", codigo, contestacion);
+			
 			sprintf(respuesta, "%s", contestacion);
 			write (sock_conn,respuesta,strlen(respuesta));
-			}
 		}
 		else if(codigo == 4) //lista de jugadores de la base de datos
 		{
@@ -665,7 +657,7 @@ int main(int argc, char *argv[])
 	pthread_t thread;
 	lista.num = 0;
 	int conexion = 0;
-	int puerto = 5054;
+	int puerto = 5070;
 	int i = 0;
 	
 	//abrimos el socket

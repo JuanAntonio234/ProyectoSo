@@ -67,14 +67,14 @@ public class ChatManager : MonoBehaviour
     private ConexionServidor conexionServidor;
 
 
-    TMP_Text textoChat;
+    TextMeshProUGUI textoChat;
     TMP_InputField mensajeInputChat;
     public TMP_InputField nameChat;
 
 
     private void Start()
     {
-        textoChat = GameObject.Find("Chat").GetComponent<TMP_Text>();
+        textoChat = GameObject.Find("Chat").GetComponent<TextMeshProUGUI>();
         mensajeInputChat = GameObject.Find("MensajeInputChat").GetComponent<TMP_InputField>();
 
         // Inicializar la instancia de ConexionServidor
