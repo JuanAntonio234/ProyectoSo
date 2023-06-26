@@ -233,18 +233,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: baed5d2d945fba44e901320d23bae592, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  texto: {fileID: 0}
+  text1: {fileID: 0}
   NameInput: {fileID: 0}
   PasswordInput: {fileID: 0}
   ConfirmPasswordInput: {fileID: 0}
-  Consulta1: {fileID: 0}
-  Consulta2: {fileID: 0}
-  Consulta3: {fileID: 0}
   NombreJugadorInputField: {fileID: 0}
-  RespuestaConsultas: {fileID: 0}
   panelInvitacion1: {fileID: 0}
   textMensaje: {fileID: 0}
-  invitacionAceptadaRechazada: {fileID: 0}
   HostInput: {fileID: 0}
   InvitadoInput: {fileID: 0}
   Chat: {fileID: 0}
@@ -585,7 +580,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Volver al Men\xFA"
+  m_text: "Volver al men\xFA"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
