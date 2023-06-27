@@ -47,7 +47,7 @@ public class CCliente : MonoBehaviour
             conexionServidor = new ConexionServidor();
         }
         // Obtener el componente ChatManager adjunto al GameObject
-        chatManager = GetComponent<ChatManager>();
+        chatManager = FindObjectOfType<ChatManager>();
     }
     private async void Start()
     {
@@ -182,22 +182,21 @@ public class CCliente : MonoBehaviour
                     }
                     break;
                 case 5: //lista jugadores conectados
-                    if (mensaje == "SI")
-                    {
-                        int numeroConectados = int.Parse(trozos[2]);
-                        List<string> jugadoresConectados = new List<string>();
-                        for (int i = 0; i < numeroConectados; i++)
-                        {
-                            jugadoresConectados.Add(trozos[i + 2]);
-                        }
 
-                        string jugadoresConectadosStr = "";
+                        List<string> jugadoresConectados = new List<string>();
+                        for (int i = 2; i < trozos.Length; i++)
+                        {
+                            jugadoresConectados.Add(trozos[i]);
+                        }
+                        string STRjugadoresConectados = "";
+
                         foreach (string jugador in jugadoresConectados)
                         {
-                            jugadoresConectadosStr += jugador + ", ";
+                            STRjugadoresConectados += jugador + ", ";
                         }
-                        text1.text = "Jugadores conectados: " + jugadoresConectadosStr;
-                    }
+                        text1 = GameObject.Find("Respuestas").GetComponent<TextMeshProUGUI>();
+                        text1.text = "";
+                        text1.text = "Jugadores conectados: " + STRjugadoresConectados;
                     break;
                 case 7: //invitacion a partida
                     if (mensaje == "No existe")
@@ -236,7 +235,6 @@ public class CCliente : MonoBehaviour
                         textMensaje = GameObject.Find("MensajeInvitacion").GetComponent<TextMeshProUGUI>();
                         textMensaje.text = mensaje;
                     }
-
                     break;
                 case 10: //recibir mensaje
 
@@ -262,8 +260,6 @@ public class CCliente : MonoBehaviour
                 case 12: //desconectar
                     if (mensaje == "Desconectando")
                     {
-                        NameInput.text = "";
-                        PasswordInput.text = "";
                         Debug.Log("Cerrando sesión");
                         SceneManager.LoadScene("MenuPrincipal");
                     }
@@ -399,5 +395,10 @@ public class CCliente : MonoBehaviour
         Debug.Log("Enviado");
     }
 
-    ///el login aunque estes registrado te dice que no
+    public void ListaConectados()
+    {
+        string conectados = "7";
+        conexionServidor.EnviarMensajeServidor(conectados);
+        Debug.Log("Enviado");
+    }
 }

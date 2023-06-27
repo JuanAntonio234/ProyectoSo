@@ -949,6 +949,7 @@ MonoBehaviour:
   PasswordInput: {fileID: 614164506}
   ConfirmPasswordInput: {fileID: 0}
   NombreJugadorInputField: {fileID: 0}
+  notificacion: {fileID: 0}
   panelInvitacion1: {fileID: 0}
   textMensaje: {fileID: 0}
   HostInput: {fileID: 0}
@@ -1308,8 +1309,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 133.8829, y: -192}
-  m_SizeDelta: {x: 246.1124, y: 67.861}
+  m_AnchoredPosition: {x: 161.0278, y: -192}
+  m_SizeDelta: {x: 300.4022, y: 67.861}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &985243503
 MonoBehaviour:
@@ -1387,8 +1388,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
+  m_Sprite: {fileID: 21300000, guid: 7cccdb46070f7374fbcbe4e7711c0439, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -1463,7 +1464,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Darse de baja
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2373,7 +2374,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Texture: {fileID: 0}
+  m_Texture: {fileID: 2800000, guid: 6f992d390e760b8438e05dc53e3564d4, type: 3}
   m_UVRect:
     serializedVersion: 2
     x: 0
