@@ -1,12 +1,10 @@
 using Client;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 
 public class CCliente : MonoBehaviour
 {
@@ -28,6 +26,7 @@ public class CCliente : MonoBehaviour
     public TextMeshProUGUI textMensaje;
     public TMP_InputField HostInput;
     public TMP_InputField InvitadoInput;
+    private string host;
 
     //variables para el chat
     public TextMeshProUGUI Chat;
@@ -44,6 +43,8 @@ public class CCliente : MonoBehaviour
         {
             conexionServidor = new ConexionServidor();
         }
+        // Obtener el componente ChatManager adjunto al GameObject
+        chatManager = GetComponent<ChatManager>();
     }
     private async void Start()
     {
@@ -63,26 +64,22 @@ public class CCliente : MonoBehaviour
                 return;// Sale del método Start si la conexión falla
             }
         }
-        // Obtener el componente ChatManager adjunto al GameObject
-           chatManager = GetComponent<ChatManager>();
 
         //continua con el resto del codigo
-       await AtenderServidor();
+        await AtenderServidor();
     }
 
     private async Task AtenderServidor()
     {
         while (true)
         {
-            string respuestaServidor = await Task.Run(()=>conexionServidor.EscucharMensaje());
-          
+            string respuestaServidor = await Task.Run(() => conexionServidor.EscucharMensaje());
+            Debug.Log(respuestaServidor);
+
             //codigo para separar el mensaje recibido del servidor
             string[] trozos = respuestaServidor.Split('-');
-          
             int codigo = Convert.ToInt32(trozos[0]);
             string mensaje = trozos[1];
-            Debug.Log(codigo);
-            Debug.Log(mensaje);
 
             switch (codigo)
             {
@@ -98,8 +95,9 @@ public class CCliente : MonoBehaviour
                     }
                     else if (mensaje == "Error")
                     {
+                        text1 = GameObject.Find("ErrorTxt").GetComponent<TextMeshProUGUI>();
                         Debug.Log(trozos[2]);
-                        text1.text = "Error: " + trozos[2]; 
+                        text1.text = "Error: " + trozos[2];
                     }
                     break;
                 case 1: //registrar
@@ -110,6 +108,7 @@ public class CCliente : MonoBehaviour
                     }
                     else if (mensaje == "Error")
                     {
+                        text1 = GameObject.Find("Text").GetComponent<TextMeshProUGUI>();
                         text1.text = "Error: " + trozos[2];
                         Debug.Log("Problema al crear al usuario");
                     }
@@ -133,18 +132,18 @@ public class CCliente : MonoBehaviour
                 case 3://consulta: mostrar todos los jugadores de la base de datos
                     if (mensaje == "SI")
                     {
-                        int numeroTotal = int.Parse(trozos[2]);
                         List<string> jugadoresTotales = new List<string>();
-                        for (int i = 0; i < numeroTotal; i++)
+                        for (int i = 2; i < trozos.Length; i++)
                         {
-                            jugadoresTotales.Add(trozos[i + 2]);
+                            jugadoresTotales.Add(trozos[i]);
                         }
-
                         string STRjugadoresTotales = "";
+
                         foreach (string jugador in jugadoresTotales)
                         {
                             STRjugadoresTotales += jugador + ", ";
                         }
+
                         text1 = GameObject.Find("Respuestas").GetComponent<TextMeshProUGUI>();
                         text1.text = "Jugadores totales: " + STRjugadoresTotales;
                     }
@@ -158,9 +157,11 @@ public class CCliente : MonoBehaviour
                 case 4://consulta: Dame las partidas ganadas de un jugador introducida por pantalla
                     if (mensaje == "SI")
                     {
-                        int partidasGanadas = Convert.ToInt32(trozos[2]);
+                        string nombre = trozos[2];
+                        int partidasGanadas = Convert.ToInt32(trozos[3]);
+                        Debug.Log("Partidas ganadas: " + partidasGanadas);
                         text1 = GameObject.Find("Respuestas").GetComponent<TextMeshProUGUI>();
-                        text1.text = "La ID del jugador es: " + partidasGanadas;
+                        text1.text = "Partidas ganadas de " + nombre + " = " + partidasGanadas;
                     }
                     else if (mensaje == "Error")
                     {
@@ -189,47 +190,57 @@ public class CCliente : MonoBehaviour
                     }
                     break;
                 case 7: //invitacion a partida
-                    if (mensaje == "SI")
+                    if (mensaje == "No existe")
                     {
-                        panelInvitacion1.AbrirPanel();
-                        string nombreHost = trozos[2];
-                        textMensaje.text = nombreHost + "te ha invitado a jugar";
+                        textMensaje.text = mensaje;
+                    }
+                    else if (mensaje == "Invitacion enviada")
+                    {
+                        textMensaje.text = "Invitación enviada, esperando respuesta";
+                    }
+                    else if (mensaje == "No puedes invitarte a ti mismo")
+                    {
+                        textMensaje.text = mensaje;
                     }
                     break;
-                case 8: //respuesta invitacion a partida siendo el host
-                    string respuesta = trozos[1];
-                    int idP = Convert.ToInt32(trozos[2]);
-                    if (respuesta == "SI")
+                case 8: //respuesta invitacion a partida siendo el invitado
+                    panelInvitacion1.AbrirPanel();
+                    host = mensaje;
+                    textMensaje.text = "Nueva invitación de " + mensaje;
+                    break;
+                case 9: //respuesta invitacion en caso de ser el host
+                    if (mensaje == "Invitacion aceptada")
                     {
-                        text1.text = "El jugador ha aceptado la invitacion.";
-                        panelInvitacion1.CerrarPanel();
+                        textMensaje.text = mensaje;
+                        EnviarID(trozos[2]);
+
                         SceneManager.LoadScene("Gameplay");
                     }
-                    else if (respuesta == "NO")
+                    else if (mensaje == "Invitacion rechazada")
                     {
-                        panelInvitacion1.CerrarPanel();
-                        text1.text = "El jugador ha rechazado la invitacion. Vuelve a invitar a alguien para poder jugar.";
+                        textMensaje.text = mensaje;
                     }
-                    break;
-                /* case 9: //respuesta invitacion en caso de ser el invitado
-                           string respuesta = trozos[1];
-                           int idP2 = Convert.ToInt32(trozos[2]);
-                           if (respuesta == "SI")
-                           {
-                               SceneManager.LoadScene("Gameplay");
-                           }
 
-                break;*/
+                    break;
                 case 10: //recibir mensaje
-                    if (chatManager != null)
+
+                    string usuario = trozos[2];
+
+                    chatManager.ActualizarMensajeChat(mensaje, usuario);
+                    break;
+                case 11: //abre juego en invitado
+                    Debug.Log(mensaje);
+                    SceneManager.LoadScene("Gameplay");
+                    break;
+                case 15:
+                    if (mensaje == "SI")
                     {
-                        string message = trozos[2];
-                        string usuario = trozos[3];
-                        chatManager.ActualizarMensajeChat(message,usuario);
+                        Debug.Log("Registrado Correctamente");
+                        SceneManager.LoadScene("MenuPrincipal");
                     }
-                    else
+                    else if (mensaje == "Error")
                     {
-                        Debug.Log("ChatManager no encontrado");
+                        Debug.Log("Problema al crear al usuario");
                     }
                     break;
                 case -1: //desconectar
@@ -240,11 +251,6 @@ public class CCliente : MonoBehaviour
                     break;
             }
         }
-    }
-
-    public void Conectarse() //procedimiento para conectarse al servidor
-    {
-
     }
 
     public void IniciarSesion() //procedimiento para iniciar sesión
@@ -302,33 +308,31 @@ public class CCliente : MonoBehaviour
     public void Invitar() //invitar
 
     {
-        string invitado = InvitadoInput.text;
-
-        string invitar = "11-" + invitado;
+        string invitar = "11-" + HostInput.text + "-" + InvitadoInput.text;
         conexionServidor.EnviarMensajeServidor(invitar);
         Debug.Log("Enviado");
     }
-
     public void AceptaInvitacion() //aceptar invitacion
-
     {
-        string host = NameInput.text;
-
-        string mensajeAceptaInvitacion = "12-" + host + "-SI";
+        string mensajeAceptaInvitacion = "12-SI-" + host;
         conexionServidor.EnviarMensajeServidor(mensajeAceptaInvitacion);
         Debug.Log("Enviado");
         panelInvitacion1.CerrarPanel();
     }
 
     public void RechazarPartida() //denegar invitacion
-
     {
-        string host = NameInput.text;
-
-        string mensajeRechazaInvitacion = "12-" + host + "-NO";
+        string mensajeRechazaInvitacion = "12-NO-" + host;
         conexionServidor.EnviarMensajeServidor(mensajeRechazaInvitacion);
         Debug.Log("Enviado");
         panelInvitacion1.CerrarPanel();
+    }
+
+    public void EnviarID(string ID)
+    {
+        string mensaje = "13-" + ID;
+        conexionServidor.EnviarMensajeServidor(mensaje);
+        Debug.Log("Enviado");
     }
 
     public void Cerrar() //cerrar el juego desde el menú
@@ -337,14 +341,15 @@ public class CCliente : MonoBehaviour
         Application.Quit();
     }
 
+    public void DarseDeBaja()
+    {
+        string Name = NameInput.text;
+        string Password = PasswordInput.text;
 
+        string mensajeEliminar = "15-" + Name + "-" + Password;
+        conexionServidor.EnviarMensajeServidor(mensajeEliminar);
+        Debug.Log("Enviado");
+    }
 
-
-
-
-
-
-
-    ///////////////////////////////////añadir funcion para eliminar completamente a un jugador de la lista
     ///el login aunque estes registrado te dice que no
 }

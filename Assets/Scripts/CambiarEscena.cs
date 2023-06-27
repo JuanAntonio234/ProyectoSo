@@ -35,4 +35,8 @@ public class CambiarEscena : MonoBehaviour
     {
         SceneManager.LoadSceneAsync("JuegoCompletado");
     }
+    public void IrADarseDeBaja()
+    {
+        SceneManager.LoadSceneAsync("DarDeBaja");
+    }
 }

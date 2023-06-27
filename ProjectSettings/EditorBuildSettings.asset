@@ -29,4 +29,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/JuegoCompletado.unity
     guid: 5a19e17ca8e440640a3024931e2bd6f7
+  - enabled: 1
+    path: Assets/Scenes/DarDeBaja.unity
+    guid: fd67cce5f4a45af4f9137ac34849a82b
   m_configObjects: {}
