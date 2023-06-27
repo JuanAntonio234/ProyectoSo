@@ -96,6 +96,7 @@ public class CCliente : MonoBehaviour
                     else if (mensaje == "Error")
                     {
                         text1 = GameObject.Find("ErrorTxt").GetComponent<TextMeshProUGUI>();
+                        text1.text = "";
                         Debug.Log(trozos[2]);
                         text1.text = "Error: " + trozos[2];
                     }
@@ -109,6 +110,7 @@ public class CCliente : MonoBehaviour
                     else if (mensaje == "Error")
                     {
                         text1 = GameObject.Find("Text").GetComponent<TextMeshProUGUI>();
+                        text1.text = "";
                         text1.text = "Error: " + trozos[2];
                         Debug.Log("Problema al crear al usuario");
                     }
@@ -119,12 +121,13 @@ public class CCliente : MonoBehaviour
                         int partidasGanadas = Convert.ToInt32(trozos[2]);
                         Debug.Log("Partidas ganadas: " + partidasGanadas);
                         text1 = GameObject.Find("Respuestas").GetComponent<TextMeshProUGUI>();
-
+                        text1.text = "";
                         text1.text = "Las partidas ganadas del jugador llamado Pere son: " + trozos[2];
                     }
                     else if (mensaje == "Error")
                     {
                         text1 = GameObject.Find("Respuestas").GetComponent<TextMeshProUGUI>();
+                        text1.text = "";
                         text1.text = "Error";
                         Debug.Log("No se encuentran datos que coincidan");
                     }
@@ -145,11 +148,13 @@ public class CCliente : MonoBehaviour
                         }
 
                         text1 = GameObject.Find("Respuestas").GetComponent<TextMeshProUGUI>();
+                        text1.text = "";
                         text1.text = "Jugadores totales: " + STRjugadoresTotales;
                     }
                     else if (mensaje == "Error")
                     {
                         text1 = GameObject.Find("Respuestas").GetComponent<TextMeshProUGUI>();
+                        text1.text = "";
                         text1.text = "No se encuentran datos que coincidan";
                         Debug.Log("No se encuentran datos que coincidan");
                     }
@@ -161,6 +166,7 @@ public class CCliente : MonoBehaviour
                         int partidasGanadas = Convert.ToInt32(trozos[3]);
                         Debug.Log("Partidas ganadas: " + partidasGanadas);
                         text1 = GameObject.Find("Respuestas").GetComponent<TextMeshProUGUI>();
+                        text1.text = "";
                         text1.text = "Partidas ganadas de " + nombre + " = " + partidasGanadas;
                     }
                     else if (mensaje == "Error")
@@ -168,6 +174,7 @@ public class CCliente : MonoBehaviour
 
                         text1.text = "No se encuentran datos que coincidan";
                         text1 = GameObject.Find("Respuestas").GetComponent<TextMeshProUGUI>();
+                        text1.text = "";
                         Debug.Log("No se encuentran datos que coincidan");
                     }
                     break;
@@ -235,12 +242,12 @@ public class CCliente : MonoBehaviour
                 case 15:
                     if (mensaje == "SI")
                     {
-                        Debug.Log("Registrado Correctamente");
+                        Debug.Log("Eliminado Correctamente");
                         SceneManager.LoadScene("MenuPrincipal");
                     }
                     else if (mensaje == "Error")
                     {
-                        Debug.Log("Problema al crear al usuario");
+                        Debug.Log("Problema al eliminar al usuario");
                     }
                     break;
                 case -1: //desconectar
@@ -258,9 +265,17 @@ public class CCliente : MonoBehaviour
         string Name = NameInput.text;
         string Password = PasswordInput.text;
 
-        string mensajeIniciarSesion = "0-" + Name + "-" + Password;
-        conexionServidor.EnviarMensajeServidor(mensajeIniciarSesion);
-        Debug.Log("Enviado");
+        if ((Password != "") || Name != "")
+        {
+            string mensajeIniciarSesion = "0-" + Name + "-" + Password;
+            conexionServidor.EnviarMensajeServidor(mensajeIniciarSesion);
+            Debug.Log("Enviado");
+        }
+        else
+        {
+            text1 = GameObject.Find("Text").GetComponent<TextMeshProUGUI>();
+            text1.text = "No has rellenado todos los apartados";
+        }
     }
 
     public void Registrar() //procedimiento para registrarse
@@ -269,16 +284,24 @@ public class CCliente : MonoBehaviour
         string Password = PasswordInput.text;
         string PasswordConfirm = ConfirmPasswordInput.text;
 
-        if ((Password == PasswordConfirm) && (PasswordInput != null) && (PasswordConfirm != null) && (Name != null))
+        if ((Password != "") || (PasswordConfirm != "") || Name != "")
         {
-            string registrar = "1-" + Name + "-" + Password;
-            conexionServidor.EnviarMensajeServidor(registrar);
-            Debug.Log("Enviado");
+            if ((Password == PasswordConfirm) && (PasswordInput != null) && (PasswordConfirm != null) && (Name != null))
+            {
+                string registrar = "1-" + Name + "-" + Password;
+                conexionServidor.EnviarMensajeServidor(registrar);
+                Debug.Log("Enviado");
+            }
+            else if (PasswordInput.text != ConfirmPasswordInput.text)
+            {
+                text1.text = "Las contraseñas no coinciden";
+                Debug.Log("Las contraseñas no coinciden");
+            }
         }
-        else if (PasswordInput.text != ConfirmPasswordInput.text)
+        else
         {
-            text1.text = "Las contraseñas no coinciden";
-            Debug.Log("Las contraseñas no coinciden");
+            text1 = GameObject.Find("Text").GetComponent<TextMeshProUGUI>();
+            text1.text = "No has rellenado todos los apartados";
         }
     }
 
