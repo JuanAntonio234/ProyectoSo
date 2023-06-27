@@ -6,7 +6,7 @@ public class ChatManager : MonoBehaviour
 {
     private ConexionServidor conexionServidor;
 
-    TextMeshProUGUI textoChat;
+   private TextMeshProUGUI textoChat;
     TMP_InputField mensajeInputChat;
     public TMP_InputField nameChat;
 
@@ -34,7 +34,6 @@ public class ChatManager : MonoBehaviour
                 nameChat.text = "";
                 string mensaje = "9-" + mensajeChat + "-" + name;
                 EnviarMensajeChat(mensaje);
-                //   ActualizarMensajeChat(name, mensajeChat);
             }
         }
     }

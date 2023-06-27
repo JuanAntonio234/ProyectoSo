@@ -46,8 +46,6 @@ public class CCliente : MonoBehaviour
         {
             conexionServidor = new ConexionServidor();
         }
-        // Obtener el componente ChatManager adjunto al GameObject
-        chatManager = FindObjectOfType<ChatManager>();
     }
     private async void Start()
     {
@@ -183,20 +181,20 @@ public class CCliente : MonoBehaviour
                     break;
                 case 5: //lista jugadores conectados
 
-                        List<string> jugadoresConectados = new List<string>();
-                        for (int i = 2; i < trozos.Length; i++)
-                        {
-                            jugadoresConectados.Add(trozos[i]);
-                        }
-                        string STRjugadoresConectados = "";
+                    List<string> jugadoresConectados = new List<string>();
+                    for (int i = 2; i < trozos.Length; i++)
+                    {
+                        jugadoresConectados.Add(trozos[i]);
+                    }
+                    string STRjugadoresConectados = "";
 
-                        foreach (string jugador in jugadoresConectados)
-                        {
-                            STRjugadoresConectados += jugador + ", ";
-                        }
-                        text1 = GameObject.Find("Respuestas").GetComponent<TextMeshProUGUI>();
-                        text1.text = "";
-                        text1.text = "Jugadores conectados: " + STRjugadoresConectados;
+                    foreach (string jugador in jugadoresConectados)
+                    {
+                        STRjugadoresConectados += jugador + ", ";
+                    }
+                    text1 = GameObject.Find("Respuestas").GetComponent<TextMeshProUGUI>();
+                    text1.text = "";
+                    text1.text = "Jugadores conectados: " + STRjugadoresConectados;
                     break;
                 case 7: //invitacion a partida
                     if (mensaje == "No existe")
@@ -237,10 +235,10 @@ public class CCliente : MonoBehaviour
                     }
                     break;
                 case 10: //recibir mensaje
-
                     string usuario = trozos[2];
 
-                    chatManager.ActualizarMensajeChat(mensaje, usuario);
+                    Chat = GameObject.Find("Chat").GetComponent<TextMeshProUGUI>();
+                    Chat.text += ">>" + usuario + "-" + mensaje + "\n";
                     break;
                 case 11: //abre juego en invitado
                     Debug.Log(mensaje);
@@ -338,7 +336,7 @@ public class CCliente : MonoBehaviour
         string mensaje = "5-" + usuario + "-" + contrasena;
         conexionServidor.EnviarMensajeServidor(mensaje);
         Debug.Log("Enviado");
-    } 
+    }
 
     public void PartidasGanadasJugador() // Realizar consulta 3
     {
