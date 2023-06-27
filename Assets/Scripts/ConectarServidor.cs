@@ -14,13 +14,13 @@ namespace Client
         private bool connected = false;
         private bool loggedIn = false;
         private static ConexionServidor instance = null;
-        public int puerto = 5072;
+        public int puerto = 5070;
 
 
         // Constructor privado para evitar que se instancie directamente
         public ConexionServidor()
         {
-            this.ip = IPAddress.Parse("192.168.56.101");
+            this.ip = IPAddress.Parse("192.168.56.102");
             this.port = new IPEndPoint(this.ip, puerto);
             servidor = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         }

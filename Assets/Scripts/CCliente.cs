@@ -18,6 +18,7 @@ public class CCliente : MonoBehaviour
 
     //variables para las consultas
     public TMP_InputField NombreJugadorInputField;
+    public TextMeshProUGUI notificacion;
 
     //varible para mostrar el panel usado para la funcion invitiacion
     public PanelInvitacion panelInvitacion1;
@@ -27,6 +28,8 @@ public class CCliente : MonoBehaviour
     public TMP_InputField HostInput;
     public TMP_InputField InvitadoInput;
     private string host;
+    private string usuario;
+    private string contrasena;
 
     //variables para el chat
     public TextMeshProUGUI Chat;
@@ -199,25 +202,30 @@ public class CCliente : MonoBehaviour
                 case 7: //invitacion a partida
                     if (mensaje == "No existe")
                     {
+                        textMensaje = GameObject.Find("MensajeInvitacion").GetComponent<TextMeshProUGUI>();
                         textMensaje.text = mensaje;
                     }
                     else if (mensaje == "Invitacion enviada")
                     {
+                        textMensaje = GameObject.Find("MensajeInvitacion").GetComponent<TextMeshProUGUI>();
                         textMensaje.text = "Invitación enviada, esperando respuesta";
                     }
                     else if (mensaje == "No puedes invitarte a ti mismo")
                     {
+                        textMensaje = GameObject.Find("MensajeInvitacion").GetComponent<TextMeshProUGUI>();
                         textMensaje.text = mensaje;
                     }
                     break;
                 case 8: //respuesta invitacion a partida siendo el invitado
                     panelInvitacion1.AbrirPanel();
                     host = mensaje;
+                    textMensaje = GameObject.Find("MensajeInvitacion").GetComponent<TextMeshProUGUI>();
                     textMensaje.text = "Nueva invitación de " + mensaje;
                     break;
                 case 9: //respuesta invitacion en caso de ser el host
                     if (mensaje == "Invitacion aceptada")
                     {
+                        textMensaje = GameObject.Find("MensajeInvitacion").GetComponent<TextMeshProUGUI>();
                         textMensaje.text = mensaje;
                         EnviarID(trozos[2]);
 
@@ -225,6 +233,7 @@ public class CCliente : MonoBehaviour
                     }
                     else if (mensaje == "Invitacion rechazada")
                     {
+                        textMensaje = GameObject.Find("MensajeInvitacion").GetComponent<TextMeshProUGUI>();
                         textMensaje.text = mensaje;
                     }
 
@@ -250,11 +259,16 @@ public class CCliente : MonoBehaviour
                         Debug.Log("Problema al eliminar al usuario");
                     }
                     break;
-                case -1: //desconectar
-                    if (codigo == 10)
+                case 12: //desconectar
+                    if (mensaje == "Desconectando")
                     {
-                        Debug.Log("Desconectandose");
+                        NameInput.text = "";
+                        PasswordInput.text = "";
+                        Debug.Log("Cerrando sesión");
+                        SceneManager.LoadScene("MenuPrincipal");
                     }
+                    else if (mensaje == "Error al desconectar")
+                        notificacion.text = "Error al desconectar";
                     break;
             }
         }
@@ -270,6 +284,8 @@ public class CCliente : MonoBehaviour
             string mensajeIniciarSesion = "0-" + Name + "-" + Password;
             conexionServidor.EnviarMensajeServidor(mensajeIniciarSesion);
             Debug.Log("Enviado");
+            usuario = NameInput.text;
+            contrasena = PasswordInput.text;
         }
         else
         {
@@ -291,6 +307,8 @@ public class CCliente : MonoBehaviour
                 string registrar = "1-" + Name + "-" + Password;
                 conexionServidor.EnviarMensajeServidor(registrar);
                 Debug.Log("Enviado");
+                usuario = NameInput.text;
+                contrasena = PasswordInput.text;
             }
             else if (PasswordInput.text != ConfirmPasswordInput.text)
             {
@@ -318,6 +336,13 @@ public class CCliente : MonoBehaviour
         conexionServidor.EnviarMensajeServidor(query2);
         Debug.Log("Enviado");
     }
+
+    public void Desconectar() //desconectar/log out
+    {
+        string mensaje = "5-" + usuario + "-" + contrasena;
+        conexionServidor.EnviarMensajeServidor(mensaje);
+        Debug.Log("Enviado");
+    } 
 
     public void PartidasGanadasJugador() // Realizar consulta 3
     {
