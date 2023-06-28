@@ -30,6 +30,8 @@ public class CCliente : MonoBehaviour
     private string host;
     private string usuario;
     private string contrasena;
+    public Button aceptar;
+    public Button Rechazar;
 
     //variables para el chat
     public TextMeshProUGUI Chat;
@@ -65,10 +67,13 @@ public class CCliente : MonoBehaviour
                 return;// Sale del método Start si la conexión falla
             }
         }
-
+        aceptar.OnClick.AddListener(AceptaInvitacion);
+        rechazar.OnClick.AddListener(RechazarPartida);
         //continua con el resto del codigo
         await AtenderServidor();
     }
+
+
 
     private async Task AtenderServidor()
     {
@@ -87,12 +92,11 @@ public class CCliente : MonoBehaviour
                 case 0: //login
                     if (mensaje == "SI")
                     {
-                        if (conexionServidor.IsLoggedIn() == false)
-                        {
+                        
                             conexionServidor.SetLoggedIn(true);
                             Debug.Log("Se ha accedido correctamente a la cuenta");
                             SceneManager.LoadScene("MenuJuego");
-                        }
+                        
                     }
                     else if (mensaje == "Error")
                     {
@@ -105,6 +109,7 @@ public class CCliente : MonoBehaviour
                 case 1: //registrar
                     if (mensaje == "SI")
                     {
+                        conexionServidor.SetLoggedIn(true);
                         Debug.Log("Registrado Correctamente");
                         SceneManager.LoadScene("MenuJuego");
                     }
@@ -214,9 +219,10 @@ public class CCliente : MonoBehaviour
                     }
                     break;
                 case 8: //respuesta invitacion a partida siendo el invitado
-                    panelInvitacion1.AbrirPanel();
-                    host = mensaje;
-                    textMensaje = GameObject.Find("MensajeInvitacion").GetComponent<TextMeshProUGUI>();
+                    SceneManager.LoadScene("Invitacion");
+                    AceptaInvitacion(mensaje);
+                    RechazarInvitacion(mensaje);
+                    textMensaje = GameObject.Find("Text (TMP)").GetComponent<TextMeshProUGUI>();
                     textMensaje.text = "Nueva invitación de " + mensaje;
                     break;
                 case 9: //respuesta invitacion en caso de ser el host
@@ -258,6 +264,7 @@ public class CCliente : MonoBehaviour
                 case 12: //desconectar
                     if (mensaje == "Desconectando")
                     {
+                        conexionServidor.SetLoggedIn(true);
                         Debug.Log("Cerrando sesión");
                         SceneManager.LoadScene("MenuPrincipal");
                     }
@@ -354,20 +361,21 @@ public class CCliente : MonoBehaviour
         conexionServidor.EnviarMensajeServidor(invitar);
         Debug.Log("Enviado");
     }
-    public void AceptaInvitacion() //aceptar invitacion
+
+    public void AceptaInvitacion(string host) //aceptar invitacion
     {
         string mensajeAceptaInvitacion = "12-SI-" + host;
         conexionServidor.EnviarMensajeServidor(mensajeAceptaInvitacion);
         Debug.Log("Enviado");
-        panelInvitacion1.CerrarPanel();
+        SceneManager.LoadScene("MenuJuego");
     }
 
-    public void RechazarPartida() //denegar invitacion
+    public void RechazarPartida(string host) //denegar invitacion
     {
         string mensajeRechazaInvitacion = "12-NO-" + host;
         conexionServidor.EnviarMensajeServidor(mensajeRechazaInvitacion);
         Debug.Log("Enviado");
-        panelInvitacion1.CerrarPanel();
+        SceneManager.LoadScene("MenuJuego");
     }
 
     public void EnviarID(string ID)

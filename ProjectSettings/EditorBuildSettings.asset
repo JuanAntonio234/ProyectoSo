@@ -21,6 +21,9 @@ EditorBuildSettings:
     path: Assets/Scenes/MenuJuego.unity
     guid: 9c662cdec7c400a4d8566ebbc69033a9
   - enabled: 1
+    path: Assets/Scenes/Invitacion.unity
+    guid: 269de4944d614074cbf455e796e2bd6c
+  - enabled: 1
     path: Assets/Scenes/Consulta.unity
     guid: de270da16d3923d46b9bfa1cb7e109b8
   - enabled: 1

@@ -39,4 +39,8 @@ public class CambiarEscena : MonoBehaviour
     {
         SceneManager.LoadSceneAsync("DarDeBaja");
     }
+    public void IrAInvitar()
+    {
+        SceneManager.LoadSceneAsync("Invitacion");
+    }
 }

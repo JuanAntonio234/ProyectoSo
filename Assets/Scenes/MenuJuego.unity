@@ -3487,9 +3487,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 852331212}
-        m_TargetAssemblyTypeName: PanelInvitacion, Assembly-CSharp
-        m_MethodName: AbrirPanel
+      - m_Target: {fileID: 852331210}
+        m_TargetAssemblyTypeName: CambiarEscena, Assembly-CSharp
+        m_MethodName: IrAInvitar
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
